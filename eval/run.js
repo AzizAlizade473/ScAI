@@ -45,7 +45,7 @@ const pct = (a, q) => { if (!a.length) return null; const s = [...a].sort((x, y)
         } catch (e) {
           err = e.message;
           const wait = +((e.message.match(/retry in ([\d.]+)s/) || [])[1] || 10);
-          if (e.status === 429 || e.transient) await sleep((wait + 1) * 1000); else break;
+          if (e.status === 429 || e.transient) await sleep(Math.min(30, wait + 1) * 1000); else break;
         }
       }
     }
