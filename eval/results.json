@@ -1,0 +1,1059 @@
+{
+ "ranAt": "2026-11-07T21:26:39.117Z",
+ "model": null,
+ "dataset": {
+  "n": 46,
+  "about": "Hand-written by the Scam Guardian team for testing. Not real victims' data. Labels: scam / legit. 'hard' marks cases written to trick keyword rules (legit texts that mention codes or money, scams without obvious keywords).",
+  "scam": 23,
+  "legit": 23,
+  "hard": 15
+ },
+ "threshold": "scam = caution or danger (risk >= 0.45)",
+ "metrics": {
+  "rules": {
+   "n": 46,
+   "tp": 21,
+   "fp": 4,
+   "tn": 19,
+   "fn": 2,
+   "precision": 0.84,
+   "recall": 0.913,
+   "f1": 0.875,
+   "accuracy": 0.87
+  },
+  "ai": null,
+  "fused": {
+   "n": 46,
+   "tp": 21,
+   "fp": 4,
+   "tn": 19,
+   "fn": 2,
+   "precision": 0.84,
+   "recall": 0.913,
+   "f1": 0.875,
+   "accuracy": 0.87
+  },
+  "fusedHardOnly": {
+   "n": 15,
+   "tp": 3,
+   "fp": 4,
+   "tn": 6,
+   "fn": 2,
+   "precision": 0.429,
+   "recall": 0.6,
+   "f1": 0.5,
+   "accuracy": 0.6
+  },
+  "rulesHardOnly": {
+   "n": 15,
+   "tp": 3,
+   "fp": 4,
+   "tn": 6,
+   "fn": 2,
+   "precision": 0.429,
+   "recall": 0.6,
+   "f1": 0.5,
+   "accuracy": 0.6
+  }
+ },
+ "byLang": {
+  "az": {
+   "n": 22,
+   "tp": 10,
+   "fp": 2,
+   "tn": 9,
+   "fn": 1,
+   "precision": 0.833,
+   "recall": 0.909,
+   "f1": 0.87,
+   "accuracy": 0.864
+  },
+  "ru": {
+   "n": 12,
+   "tp": 6,
+   "fp": 1,
+   "tn": 5,
+   "fn": 0,
+   "precision": 0.857,
+   "recall": 1,
+   "f1": 0.923,
+   "accuracy": 0.917
+  },
+  "en": {
+   "n": 12,
+   "tp": 5,
+   "fp": 1,
+   "tn": 5,
+   "fn": 1,
+   "precision": 0.833,
+   "recall": 0.833,
+   "f1": 0.833,
+   "accuracy": 0.833
+  }
+ },
+ "latency": {
+  "rulesMsP50": 0.04,
+  "rulesMsP95": 29.79,
+  "aiMsP50": null,
+  "aiMsP95": null,
+  "aiCalls": 0,
+  "aiFailures": 46
+ },
+ "rows": [
+  {
+   "id": "az-m01",
+   "lang": "az",
+   "kind": "message",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.84,
+    "tactics": [
+     "urgency",
+     "suspicious_link"
+    ],
+    "ms": 145.09
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.84
+   }
+  },
+  {
+   "id": "az-m02",
+   "lang": "az",
+   "kind": "message",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.86,
+    "tactics": [
+     "prize_fee",
+     "suspicious_link"
+    ],
+    "ms": 46.83
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.86
+   }
+  },
+  {
+   "id": "az-m03",
+   "lang": "az",
+   "kind": "message",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.86,
+    "tactics": [
+     "card_request",
+     "impersonation",
+     "suspicious_link"
+    ],
+    "ms": 12.72
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.86
+   }
+  },
+  {
+   "id": "az-m04",
+   "lang": "az",
+   "kind": "message",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.84,
+    "tactics": [
+     "money_transfer",
+     "urgency"
+    ],
+    "ms": 0.08
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.84
+   }
+  },
+  {
+   "id": "az-m05",
+   "lang": "az",
+   "kind": "message",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.82,
+    "tactics": [
+     "suspicious_link"
+    ],
+    "ms": 0.24
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.82
+   }
+  },
+  {
+   "id": "az-m06",
+   "lang": "az",
+   "kind": "message",
+   "label": "scam",
+   "hard": true,
+   "rules": {
+    "level": "safe",
+    "risk": 0.35,
+    "tactics": [
+     "secrecy"
+    ],
+    "ms": 0.2
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0.35
+   }
+  },
+  {
+   "id": "az-m07",
+   "lang": "az",
+   "kind": "message",
+   "label": "legit",
+   "hard": true,
+   "rules": {
+    "level": "danger",
+    "risk": 0.84,
+    "tactics": [
+     "otp_request",
+     "impersonation"
+    ],
+    "ms": 1.86
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.84
+   }
+  },
+  {
+   "id": "az-m08",
+   "lang": "az",
+   "kind": "message",
+   "label": "legit",
+   "hard": false,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.04
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "az-m09",
+   "lang": "az",
+   "kind": "message",
+   "label": "legit",
+   "hard": true,
+   "rules": {
+    "level": "caution",
+    "risk": 0.58,
+    "tactics": [
+     "money_transfer"
+    ],
+    "ms": 0.03
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "caution",
+    "risk": 0.58
+   }
+  },
+  {
+   "id": "az-m10",
+   "lang": "az",
+   "kind": "message",
+   "label": "legit",
+   "hard": false,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.13
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "az-m11",
+   "lang": "az",
+   "kind": "message",
+   "label": "legit",
+   "hard": false,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.04
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "az-m12",
+   "lang": "az",
+   "kind": "message",
+   "label": "legit",
+   "hard": true,
+   "rules": {
+    "level": "safe",
+    "risk": 0.3,
+    "tactics": [
+     "urgency"
+    ],
+    "ms": 0.07
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0.3
+   }
+  },
+  {
+   "id": "az-c01",
+   "lang": "az",
+   "kind": "call",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.92,
+    "tactics": [
+     "otp_request",
+     "impersonation"
+    ],
+    "ms": 0.04
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.92
+   }
+  },
+  {
+   "id": "az-c02",
+   "lang": "az",
+   "kind": "call",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.88,
+    "tactics": [
+     "safe_account",
+     "money_transfer",
+     "secrecy"
+    ],
+    "ms": 0.15
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.88
+   }
+  },
+  {
+   "id": "az-c03",
+   "lang": "az",
+   "kind": "call",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.84,
+    "tactics": [
+     "money_transfer",
+     "impersonation",
+     "urgency"
+    ],
+    "ms": 0.04
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.84
+   }
+  },
+  {
+   "id": "az-c04",
+   "lang": "az",
+   "kind": "call",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.9,
+    "tactics": [
+     "remote_access",
+     "investment"
+    ],
+    "ms": 0.04
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.9
+   }
+  },
+  {
+   "id": "az-c05",
+   "lang": "az",
+   "kind": "call",
+   "label": "scam",
+   "hard": true,
+   "rules": {
+    "level": "caution",
+    "risk": 0.5,
+    "tactics": [
+     "impersonation",
+     "urgency"
+    ],
+    "ms": 0.04
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "caution",
+    "risk": 0.5
+   }
+  },
+  {
+   "id": "az-c06",
+   "lang": "az",
+   "kind": "call",
+   "label": "legit",
+   "hard": true,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.06
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "az-c07",
+   "lang": "az",
+   "kind": "call",
+   "label": "legit",
+   "hard": false,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.06
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "az-c08",
+   "lang": "az",
+   "kind": "call",
+   "label": "legit",
+   "hard": false,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.04
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "az-c09",
+   "lang": "az",
+   "kind": "call",
+   "label": "legit",
+   "hard": true,
+   "rules": {
+    "level": "safe",
+    "risk": 0.3,
+    "tactics": [
+     "impersonation"
+    ],
+    "ms": 0.06
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0.3
+   }
+  },
+  {
+   "id": "az-c10",
+   "lang": "az",
+   "kind": "call",
+   "label": "legit",
+   "hard": false,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.1
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "ru-m01",
+   "lang": "ru",
+   "kind": "message",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.84,
+    "tactics": [
+     "urgency",
+     "suspicious_link"
+    ],
+    "ms": 0.13
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.84
+   }
+  },
+  {
+   "id": "ru-m02",
+   "lang": "ru",
+   "kind": "message",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.86,
+    "tactics": [
+     "prize_fee",
+     "suspicious_link"
+    ],
+    "ms": 0.08
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.86
+   }
+  },
+  {
+   "id": "ru-m03",
+   "lang": "ru",
+   "kind": "message",
+   "label": "scam",
+   "hard": true,
+   "rules": {
+    "level": "danger",
+    "risk": 0.84,
+    "tactics": [
+     "money_transfer",
+     "urgency"
+    ],
+    "ms": 0.03
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.84
+   }
+  },
+  {
+   "id": "ru-m04",
+   "lang": "ru",
+   "kind": "message",
+   "label": "legit",
+   "hard": true,
+   "rules": {
+    "level": "danger",
+    "risk": 0.84,
+    "tactics": [
+     "otp_request",
+     "impersonation"
+    ],
+    "ms": 0.05
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.84
+   }
+  },
+  {
+   "id": "ru-m05",
+   "lang": "ru",
+   "kind": "message",
+   "label": "legit",
+   "hard": false,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.02
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "ru-m06",
+   "lang": "ru",
+   "kind": "message",
+   "label": "legit",
+   "hard": false,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.02
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "ru-c01",
+   "lang": "ru",
+   "kind": "call",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.92,
+    "tactics": [
+     "otp_request",
+     "impersonation"
+    ],
+    "ms": 0.05
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.92
+   }
+  },
+  {
+   "id": "ru-c02",
+   "lang": "ru",
+   "kind": "call",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "caution",
+    "risk": 0.5,
+    "tactics": [
+     "impersonation",
+     "urgency",
+     "secrecy"
+    ],
+    "ms": 0.04
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "caution",
+    "risk": 0.5
+   }
+  },
+  {
+   "id": "ru-c03",
+   "lang": "ru",
+   "kind": "call",
+   "label": "scam",
+   "hard": true,
+   "rules": {
+    "level": "danger",
+    "risk": 0.9,
+    "tactics": [
+     "remote_access"
+    ],
+    "ms": 0.03
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.9
+   }
+  },
+  {
+   "id": "ru-c04",
+   "lang": "ru",
+   "kind": "call",
+   "label": "legit",
+   "hard": true,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.04
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "ru-c05",
+   "lang": "ru",
+   "kind": "call",
+   "label": "legit",
+   "hard": false,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.02
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "ru-c06",
+   "lang": "ru",
+   "kind": "call",
+   "label": "legit",
+   "hard": false,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.02
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "en-m01",
+   "lang": "en",
+   "kind": "message",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.84,
+    "tactics": [
+     "urgency",
+     "suspicious_link"
+    ],
+    "ms": 29.79
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.84
+   }
+  },
+  {
+   "id": "en-m02",
+   "lang": "en",
+   "kind": "message",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.86,
+    "tactics": [
+     "money_transfer",
+     "prize_fee",
+     "suspicious_link"
+    ],
+    "ms": 0.2
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.86
+   }
+  },
+  {
+   "id": "en-m03",
+   "lang": "en",
+   "kind": "message",
+   "label": "scam",
+   "hard": true,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.03
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "en-m04",
+   "lang": "en",
+   "kind": "message",
+   "label": "legit",
+   "hard": true,
+   "rules": {
+    "level": "caution",
+    "risk": 0.62,
+    "tactics": [
+     "otp_request"
+    ],
+    "ms": 3.9
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "caution",
+    "risk": 0.62
+   }
+  },
+  {
+   "id": "en-m05",
+   "lang": "en",
+   "kind": "message",
+   "label": "legit",
+   "hard": false,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.03
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "en-m06",
+   "lang": "en",
+   "kind": "message",
+   "label": "legit",
+   "hard": false,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.02
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "en-c01",
+   "lang": "en",
+   "kind": "call",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.92,
+    "tactics": [
+     "otp_request"
+    ],
+    "ms": 0.05
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.92
+   }
+  },
+  {
+   "id": "en-c02",
+   "lang": "en",
+   "kind": "call",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.84,
+    "tactics": [
+     "money_transfer",
+     "impersonation"
+    ],
+    "ms": 0.03
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.84
+   }
+  },
+  {
+   "id": "en-c03",
+   "lang": "en",
+   "kind": "call",
+   "label": "scam",
+   "hard": false,
+   "rules": {
+    "level": "danger",
+    "risk": 0.86,
+    "tactics": [
+     "money_transfer",
+     "investment"
+    ],
+    "ms": 0.03
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "danger",
+    "risk": 0.86
+   }
+  },
+  {
+   "id": "en-c04",
+   "lang": "en",
+   "kind": "call",
+   "label": "legit",
+   "hard": true,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.03
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "en-c05",
+   "lang": "en",
+   "kind": "call",
+   "label": "legit",
+   "hard": false,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.02
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  },
+  {
+   "id": "en-c06",
+   "lang": "en",
+   "kind": "call",
+   "label": "legit",
+   "hard": true,
+   "rules": {
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.02
+   },
+   "ai": null,
+   "aiError": null,
+   "fused": {
+    "level": "safe",
+    "risk": 0
+   }
+  }
+ ]
+}
