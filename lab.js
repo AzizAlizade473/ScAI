@@ -53,7 +53,7 @@ az: {
  'notify.title': 'SMS · Etibarlı şəxs (simulyasiya)', 'notify.body': '{name}, Elmira xanım indi şübhəli zəng alır (Scam Guardian). Zəhmət olmasa ona zəng edin.',
  'rec.title': 'Səs yazısı', 'rec.consent': 'Razıyam: səs yazım yalnız nitqi mətnə çevirmək üçün Gemini-yə göndərilir və heç yerdə saxlanılmır.', 'rec.start': 'Yazmağa başla', 'rec.stop': 'Dayandır', 'rec.send': 'Tanı və yoxla', 'rec.max': 'Ən çox 30 saniyə',
  'rec.noMic': 'Mikrofona icazə verilmədi.', 'rec.busy': 'Nitq tanınır…', 'rec.got': 'Tanınan mətn',
- 'set.scan': 'Zənglərdə avtomatik fırıldaq yoxlaması', 'set.scanD': 'Hər zəngdə özü açılır', 'set.voice': 'Səsli xəbərdarlıq', 'set.voiceD': 'Təhlükədə səs, vibrasiya və danışıq',
+ 'set.scan': 'Zənglərdə avtomatik fırıldaq yoxlaması', 'set.scanD': 'Hər zəngdə özü açılır', 'set.voice': 'Vibrasiya', 'set.voiceD': 'Təhlükəli zəngdə telefon titrəyir',
  'set.family': 'Etibarlı şəxsə xəbər ver', 'set.familyD': 'Təhlükəli zəngdə (simulyasiya)', 'set.judge': 'Texniki detallar', 'set.judgeD': 'Münsiflər üçün: bal, gecikmə, model',
  'set.ai': 'Süni intellekt xidməti', 'set.on': 'Qoşulub', 'set.off': 'Qoşulmayıb — yalnız qaydalar', 'set.privacy': 'Məxfilik', 'set.privacyB': 'Səs heç vaxt saxlanılmır. Gemini-yə yalnız redaktə olunmuş mətn gedir (kart, telefon, kod rəqəmləri silinir). Tarixçədə yalnız nəticə və redaktə olunmuş mətn qalır.',
  'set.clear': 'Tarixçəni sil', 'set.cleared': 'Tarixçə silindi', 'set.clearQ': 'Bütün yoxlama tarixçəsi silinsin? Bunu geri qaytarmaq olmaz.', 'set.about': 'Haqqında', 'set.aboutB': 'Scam Guardian prototipidir. Real telefonda zəng səsi Android Əlçatanlıq xidməti və dinamik vasitəsilə alınmalıdır; bu demo isə zəngləri simulyasiya edir.',
@@ -93,7 +93,7 @@ ru: {
  'notify.title': 'SMS · Доверенное лицо (симуляция)', 'notify.body': '{name}, Эльмире-ханым сейчас звонят мошенники (Scam Guardian). Пожалуйста, позвоните ей.',
  'rec.title': 'Запись голоса', 'rec.consent': 'Согласен(на): запись отправляется в Gemini только для распознавания речи и нигде не хранится.', 'rec.start': 'Начать запись', 'rec.stop': 'Стоп', 'rec.send': 'Распознать и проверить', 'rec.max': 'Не более 30 секунд',
  'rec.noMic': 'Доступ к микрофону не разрешён.', 'rec.busy': 'Распознаём…', 'rec.got': 'Распознанный текст',
- 'set.scan': 'Авто-проверка звонков', 'set.scanD': 'Включается на каждом звонке', 'set.voice': 'Голосовое предупреждение', 'set.voiceD': 'Звук, вибрация и голос при опасности',
+ 'set.scan': 'Авто-проверка звонков', 'set.scanD': 'Включается на каждом звонке', 'set.voice': 'Вибрация', 'set.voiceD': 'Телефон вибрирует при опасном звонке',
  'set.family': 'Сообщать доверенному лицу', 'set.familyD': 'При опасном звонке (симуляция)', 'set.judge': 'Технические детали', 'set.judgeD': 'Для жюри: баллы, задержка, модель',
  'set.ai': 'Сервис ИИ', 'set.on': 'Подключён', 'set.off': 'Не подключён — только правила', 'set.privacy': 'Конфиденциальность', 'set.privacyB': 'Голос никогда не сохраняется. В Gemini уходит только обезличенный текст (номера карт, телефонов и коды удаляются). В истории — только результат и обезличенный текст.',
  'set.clear': 'Очистить историю', 'set.cleared': 'История очищена', 'set.clearQ': 'Удалить всю историю проверок? Это нельзя отменить.', 'set.about': 'О приложении', 'set.aboutB': 'Прототип Scam Guardian. На реальном телефоне звук звонка нужно получать через службу специальных возможностей Android и громкую связь; это демо звонки симулирует.',
@@ -133,7 +133,7 @@ en: {
  'notify.title': 'SMS · Trusted person (simulated)', 'notify.body': '{name}, Mrs Elmira is getting a suspicious call right now (Scam Guardian). Please call her.',
  'rec.title': 'Voice recording', 'rec.consent': 'I agree: my recording is sent to Gemini only to turn speech into text, and it is not stored anywhere.', 'rec.start': 'Start recording', 'rec.stop': 'Stop', 'rec.send': 'Transcribe and check', 'rec.max': 'Up to 30 seconds',
  'rec.noMic': 'Microphone permission was denied.', 'rec.busy': 'Transcribing…', 'rec.got': 'Transcribed text',
- 'set.scan': 'Automatic scam check on calls', 'set.scanD': 'Turns on by itself on every call', 'set.voice': 'Spoken warning', 'set.voiceD': 'Sound, vibration and voice on danger',
+ 'set.scan': 'Automatic scam check on calls', 'set.scanD': 'Turns on by itself on every call', 'set.voice': 'Vibration', 'set.voiceD': 'The phone vibrates on a dangerous call',
  'set.family': 'Alert my trusted person', 'set.familyD': 'On a dangerous call (simulated)', 'set.judge': 'Technical details', 'set.judgeD': 'For judges: scores, latency, model',
  'set.ai': 'AI service', 'set.on': 'Connected', 'set.off': 'Not connected — rules only', 'set.privacy': 'Privacy', 'set.privacyB': 'Audio is never stored. Only redacted text goes to Gemini (card, phone and code digits removed). History keeps only the verdict and the redacted text.',
  'set.clear': 'Clear history', 'set.cleared': 'History cleared', 'set.clearQ': 'Delete the whole check history? This cannot be undone.', 'set.about': 'About', 'set.aboutB': 'Scam Guardian prototype. On a real phone, call audio would come through the Android Accessibility service and the speakerphone; this demo simulates the calls.',
@@ -473,9 +473,7 @@ window.onLevel = function (c, lv) {
 function paintEvidence(c, i) {
   const li = $(`#trList .line[data-i="${i}"]`); if (!li) return;
   let box = li.querySelector('.evs'); if (!box) { box = document.createElement('div'); box.className = 'evs'; li.appendChild(box); }
-  const seen = new Set();
-  box.innerHTML = (c.lines[i].ev || []).filter(e => !seen.has(e.tactic + e.src) && seen.add(e.tactic + e.src))
-    .map(e => `<span class="evc ${tacticClass(e.tactic) === 'danger' ? 'danger' : ''} ${e.src === 'ai' ? 'ai' : ''}">${e.src === 'ai' ? '✦ ' : ''}${esc(tacticLabel(e.tactic))}</span>`).join('');
+  box.outerHTML = evChip(c.lines[i]) || '<div class="evs"></div>';
 }
 window.lineExtra = function (l) {
   if (l.stt === 'wait') return `<div class="stt-meta">${t('stt.wait')}</div>`;

@@ -56,7 +56,7 @@ for (const sc of S.LIST) sc.lines.forEach(([who, text], i) => jobs.push({
   file: path.join(ROOT, 'audio', sc.id, i + '.wav'), text,
   voice: who === 'caller' ? sc.voice : S.YOU, style: who === 'caller' ? sc.style : S.YOU_STYLE
 }));
-for (const [lang, text] of Object.entries(S.ALERT.text)) jobs.push({ file: path.join(ROOT, 'audio', 'alert', lang + '.wav'), text, voice: S.ALERT.voice, style: S.ALERT.style });
+if (process.argv.includes('--alert')) for (const [lang, text] of Object.entries(S.ALERT.text)) jobs.push({ file: path.join(ROOT, 'audio', 'alert', lang + '.wav'), text, voice: S.ALERT.voice, style: S.ALERT.style });
 
 (async () => {
   let made = 0, skipped = 0;

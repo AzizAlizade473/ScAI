@@ -705,16 +705,13 @@ textarea.p-input{resize:vertical;min-height:64px;line-height:1.4}
 .hangx:active{transform:scale(.95)}
 .hangx .ic{width:36px;height:36px;fill:currentColor;stroke:none}
 /* in-call scam warning (heads-up, does not interrupt the call) */
-.cx-alert{position:absolute;top:30px;left:10px;right:10px;z-index:6;border-radius:20px;padding:10px 12px 10px 14px;background:#2A1513;box-shadow:inset 0 0 0 1.5px #FF5A4F,0 14px 32px rgba(0,0,0,.55);color:#F3F4F6;animation:drop .35s ease}
-.cx-alert-h{display:flex;align-items:center;gap:8px}
-.cx-alert-h .ic{width:22px;height:22px;color:#FF8A80;flex:none}
-.cx-alert-h b{font-size:16px;font-weight:800;color:#FF8A80;flex:1;line-height:1.2}
-.cx-alert-x{width:34px;height:34px;flex:none;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:#E9EAEC;display:grid;place-items:center}
-.cx-alert-x .ic{width:18px;height:18px;color:#E9EAEC}
-.cx-alert p{font-size:14.5px;line-height:1.35;color:#F1D9D6;margin:6px 0 8px}
-.cx-alert-c{display:flex;flex-wrap:wrap;gap:6px}
-.cx-alert-c span{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid rgba(255,138,128,.5);color:#FFD2CE}
-.cx-alert-c .ic{width:14px;height:14px}
+.cx-alert{position:absolute;top:30px;left:10px;right:10px;z-index:6;display:flex;align-items:center;gap:10px;border-radius:18px;padding:8px 6px 8px 12px;background:#2A1513;box-shadow:inset 0 0 0 1.5px #FF5A4F,0 10px 24px rgba(0,0,0,.5);color:#F3F4F6;animation:drop .3s ease}
+.cx-alert > .ic{width:22px;height:22px;color:#FF8A80;flex:none}
+.cx-alert > div{flex:1;min-width:0}
+.cx-alert b{display:block;font-size:15px;font-weight:700;color:#FF8A80;line-height:1.25}
+.cx-alert p{font-size:13.5px;line-height:1.3;color:#E7C9C5}
+.cx-alert-x{width:32px;height:32px;flex:none;border:0;border-radius:50%;background:none;color:#C9CDD5;display:grid;place-items:center}
+.cx-alert-x .ic{width:18px;height:18px}
 /* call ended: same dark system-call look */
 .app[data-screen="ended"]{background:#0D0E11}
 .app[data-screen="ended"] .statusbar,.app[data-screen="ended"] .gesture{color:#fff}
@@ -1498,8 +1495,15 @@ function highlight(text,who){
   for(const [s,e,l] of spans){if(s<pos)continue;out+=esc(text.slice(pos,s))+`<mark class="kw kw-${l}">${esc(text.slice(s,e))}</mark>`;pos=e}
   return out+esc(text.slice(pos));
 }
+/* the strongest tactic found in a sentence, as one small chip */
+function evChip(l){
+  if(!window.ScamRules||!(l.ev||[]).length)return '';
+  const lv=e=>(ScamRules.TACTICS[e.tactic]||{}).level,rank=e=>({danger:3,caution:2,weak:1}[lv(e)]||0);
+  const top=[...l.ev].sort((a,b)=>rank(b)-rank(a))[0];
+  return `<div class="evs"><span class="evc ${lv(top)==='danger'?'danger':''}">${esc((ScamRules.TACTICS[top.tactic]||{label:{}}).label[state.lang]||top.tactic)}</span></div>`;
+}
 function lineHTML(l,i,typing){
-  const ev=(l.ev||[]).length&&window.ScamRules?`<div class="evs">${[...new Map(l.ev.map(e=>[e.tactic+e.src,e])).values()].map(e=>`<span class="evc ${(ScamRules.TACTICS[e.tactic]||{}).level==='danger'?'danger':''} ${e.src==='ai'?'ai':''}">${e.src==='ai'?'✦ ':''}${esc((ScamRules.TACTICS[e.tactic]||{label:{}}).label[state.lang]||e.tactic)}</span>`).join('')}</div>`:'';
+  const ev=evChip(l);
   return `<li class="line who-${l.who}${typing?' typing':''}${l.stt==='wait'?' stt-wait':''}" data-i="${i}"><div class="who">${l.who==='you'?t('call.you'):esc(callee().name||t('call.caller'))}</div><p>${typing?'':l.stt==='wait'?'…':highlight(lineText(l),l.who)}</p>${window.lineExtra?lineExtra(l):''}${ev}</li>`;
 }
 function aiChip(){
@@ -1513,7 +1517,7 @@ function aiChip(){
 /* Verdict card on the call screen: level, risk bar, one plain sentence */
 function meterHTML(){
   const c=state.call,lv=c.level,heard=c.lines.some(l=>l.who==='caller');
-  const why=lv==='danger'?`<b>${t('danger.title')}.</b> ${reasonText()}`:lv==='caution'?reasonText():heard?t('sc.safeNote'):t('sc.waiting');
+  const why=lv!=='safe'?reasonText():heard?t('sc.safeNote'):t('sc.waiting');
   return `<section class="sc-card lvl-${lv}" aria-live="polite">
     <div class="sc-head">${ic(lv==='safe'?'shieldCheck':lv==='caution'?'alert':'octagon')}<span>${t('sc.title')}</span>${aiChip()}<span class="sc-lvl">${t('risk.'+lv)}</span></div>
     <div class="sc-bar" role="meter" aria-label="${t('call.risk')}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(c.risk*100)}" aria-valuetext="${t('risk.'+lv)}" style="--v:${c.risk}"><i></i></div>
@@ -1742,7 +1746,7 @@ function startProtection(hold){
 }
 function beginListening(){
   const c=state.call;c.phase='listening';beep();vibrate(80);
-  render();snack(t('call.beepSent'));
+  render();
   setPipe([2,3,4,5],['stt']);log('Beep played to both sides');
   if(state.auto)later(nextLine,1400);
 }
@@ -1808,7 +1812,7 @@ function recompute(silent){
   if(silent)return;
   refreshLive();
   if(changed&&window.onLevel)onLevel(c,nl);
-  if(changed&&nl==='caution'){vibrate([120,80,120]);tone(700,.18);log('Level → caution')}
+  if(changed&&nl==='caution'){vibrate(120);log('Level → caution')}
   if(nl==='danger'&&!c.dangerShown){c.dangerShown=true;later(triggerDanger,700)}
 }
 function scheduleAI(){
@@ -1839,9 +1843,9 @@ function triggerDanger(){
   const c=state.call;if(!c)return;
   c.level='danger';c.risk=Math.max(c.risk,.9);c.dangerShown=true;
   const f=state.family;if(f&&f.notify)c.familyAlerted=true;
-  alarm();vibrate([400,150,400,150,400]);setTimeout(speak,900);
+  vibrate([300,120,300]);
   setPipe([6,7],c.familyAlerted?['push']:[]);flash(7);
-  log('Warn: beep + vibration + voice + in-call warning');if(c.familyAlerted)log(`Family push sent to ${f.name}`);
+  log('Warn: vibration + in-call warning');if(c.familyAlerted)log(`Family push sent to ${f.name}`);
   c.alertOpen=true;
   const box=$('#cxAlert');
   if(state.screen==='call'&&box){box.innerHTML=alertHTML();refreshLive()}else go('call');
@@ -1850,11 +1854,9 @@ function triggerDanger(){
 function alertHTML(){
   const c=state.call,f=state.family;
   if(!c||!c.alertOpen)return '';
-  return `<section class="cx-alert" role="alert">
-    <div class="cx-alert-h">${ic('octagon')}<b>${t('danger.title')}</b><button class="cx-alert-x" data-action="alertClose" aria-label="${t('common.clear')}">${ic('x')}</button></div>
-    <p>${t('danger.sub')} ${reasonText()}</p>
-    <div class="cx-alert-c"><span>${ic('speaker')}${t('danger.voice')}</span><span>${ic('vibrate')}${t('danger.vibe')}</span>${f&&c.familyAlerted?`<span>${ic('check')}${t('danger.familyNotified',{name:esc(f.name)})}</span>`:''}</div>
-  </section>`;
+  return `<section class="cx-alert" role="alert">${ic('octagon')}
+    <div><b>${t('danger.title')}</b><p>${t('danger.sub')}${f&&c.familyAlerted?' · '+t('danger.familyNotified',{name:esc(f.name)}):''}</p></div>
+    <button class="cx-alert-x" data-action="alertClose" aria-label="${t('common.clear')}">${ic('x')}</button></section>`;
 }
 const AI_TYPE={fake_bank:'bankSms',fake_prize:'prize',fake_relative:'relative',fake_courier:'courier',fake_government:'gov',investment:'invest',remote_access:'remote',other:'other',none:'other'};
 function hangUp(){
