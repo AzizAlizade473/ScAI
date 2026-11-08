@@ -59,3 +59,8 @@ hotspot, both phones with the same APK, and internet on the hotspot for Gemini.
 
 Voice goes phone to phone (WebRTC). Phone B sends the caller's audio as it received it, and its own microphone,
 as two separate streams to the server, which transcribes and analyses them. Phone A sends nothing for analysis.
+
+**In a loud hall:** use wired or Bluetooth earphones with a microphone on both phones if you can (Android uses them
+automatically): the microphone is at the mouth and the other voice is not played into the room. Otherwise hold
+the phone close to the mouth, stand apart (not side by side), and mute while the other person talks.
+Before the pitch, run **Lab → Səs testi** in the hall with sentence 1 (scam) and 3 (normal).

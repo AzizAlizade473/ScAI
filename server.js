@@ -18,6 +18,7 @@ const { LiveCallSession, MAX_SESSIONS } = require('./live/session.js');
 const { LIVE_MODELS, liveStatus } = require('./live/scammer-live.js');
 const Personas = require('./live/personas.js');
 const { handleCallConnection, roomCount } = require('./live/call-room.js');
+const Diag = require('./live/diag.js');
 
 const ROOT = __dirname;
 loadEnv();
@@ -265,6 +266,14 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && p === '/api/insights') {             // question 2 from the gold marts (MySQL only)
       if (!store.insights) throw fail(501, 'Insights need the MySQL database (see Backend/README.md)');
       return send(res, 200, await store.insights(+url.searchParams.get('days') || 14));
+    }
+    if (p === '/api/diag-stt') {                                      // speech diagnostic: read a known sentence
+      if (req.method === 'GET') return send(res, 200, { sentences: Diag.SENTENCES });
+      if (req.method === 'POST') {
+        needKey(); rateLimit(req, 3);
+        const wav = await readBody(req, 4 * 1024 * 1024);         // audio is processed in memory only
+        return send(res, 200, await Diag.runDiag({ apiKey: KEY, baseUrl: BASE, model: MODEL }, +(url.searchParams.get('ref') || 0), wav));
+      }
     }
     if (req.method === 'GET' && p === '/api/eval') {
       const f = path.join(ROOT, 'eval', 'results.json');

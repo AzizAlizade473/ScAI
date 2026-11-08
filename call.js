@@ -19,7 +19,9 @@ const CSTR = {
   'pp.declined': 'Zəng rədd edildi', 'pp.ended': 'Zəng bitdi', 'pp.lost': 'Bağlantı kəsildi', 'pp.peerAway': 'Qarşı tərəfin bağlantısı kəsildi, gözlənilir…',
   'pp.s.calling': 'Zəng edilir…', 'pp.s.connecting': 'Qoşulur…', 'pp.s.connected': 'Qoşuldu', 'pp.s.reconnecting': 'Bərpa olunur…', 'pp.s.error': 'Bağlantı yoxdur', 'pp.s.muted': 'Mikrofon söndürülüb',
   'pp.callerNote': 'Siz zəng edənsiniz. Scam Guardian zəngi qarşı tərəfin telefonunda yoxlayır.', 'pp.aiOff': 'AI əlçatan deyil: yalnız qaydalar işləyir', 'pp.sttOff': 'Nitq tanıma əlçatan deyil',
-  'pp.teammate': 'Komanda yoldaşı', 'pp.number': 'Scam Guardian zəngi', 'pp.noRtc': 'Bu cihaz WebRTC dəstəkləmir', 'pp.connMs': 'Səs bağlantısı', 'pp.warnMs': 'Xəbərdarlıq sözlərdən sonra' },
+  'pp.teammate': 'Komanda yoldaşı', 'pp.number': 'Scam Guardian zəngi', 'pp.noRtc': 'Bu cihaz WebRTC dəstəkləmir', 'pp.connMs': 'Səs bağlantısı', 'pp.warnMs': 'Xəbərdarlıq sözlərdən sonra', 'pp.unclear': 'səs aydın deyil (yoxlanmadı)',
+  'dg.title': 'Səs testi', 'dg.b': 'Cümləni ucadan oxuyun. Zəngdəki kimi mətnə çevrilir və yoxlanılır: nə eşidildi, neçə söz düz tanındı, xəbərdarlıq düzdürmü. Zalda, səs-küydə də yoxlayın.',
+  'dg.rec': 'Oxu və yaz', 'dg.stop': 'Bitir və yoxla', 'dg.busy': 'Yoxlanılır…', 'dg.heard': 'Eşidildi', 'dg.acc': 'Söz dəqiqliyi', 'dg.verdict': 'Nəticə', 'dg.ok': 'düzdür', 'dg.bad': 'səhvdir', 'dg.scam': 'fırıldaq', 'dg.legit': 'normal' },
  ru: { 'pp.title': 'Звонок коллеге (2 телефона)', 'pp.b': 'Два телефона, одно приложение, один Wi-Fi. A звонит и играет мошенника, B отвечает. Scam Guardian проверяет настоящий голос звонящего на телефоне B.',
   'pp.consent': 'Я согласен на расшифровку и проверку моей речи в этом звонке. Звук не записывается; настоящих номеров карт и кодов не называем.',
   'pp.asA': 'A: Звонящий', 'pp.asB': 'B: Принимающий', 'pp.code': 'Код', 'pp.join': 'Подключиться', 'pp.ring': 'Позвонить', 'pp.cancel': 'Отмена',
@@ -28,7 +30,9 @@ const CSTR = {
   'pp.declined': 'Звонок отклонён', 'pp.ended': 'Звонок завершён', 'pp.lost': 'Связь прервана', 'pp.peerAway': 'Связь с собеседником прервалась, ждём…',
   'pp.s.calling': 'Вызов…', 'pp.s.connecting': 'Подключение…', 'pp.s.connected': 'Соединено', 'pp.s.reconnecting': 'Восстановление…', 'pp.s.error': 'Нет связи', 'pp.s.muted': 'Микрофон выключен',
   'pp.callerNote': 'Вы звоните. Scam Guardian проверяет звонок на телефоне собеседника.', 'pp.aiOff': 'ИИ недоступен: работают только правила', 'pp.sttOff': 'Распознавание речи недоступно',
-  'pp.teammate': 'Коллега', 'pp.number': 'Звонок Scam Guardian', 'pp.noRtc': 'Устройство не поддерживает WebRTC', 'pp.connMs': 'Голосовое соединение', 'pp.warnMs': 'Предупреждение после слов' },
+  'pp.teammate': 'Коллега', 'pp.number': 'Звонок Scam Guardian', 'pp.noRtc': 'Устройство не поддерживает WebRTC', 'pp.connMs': 'Голосовое соединение', 'pp.warnMs': 'Предупреждение после слов', 'pp.unclear': 'речь неразборчива (не проверено)',
+  'dg.title': 'Проверка речи', 'dg.b': 'Прочитайте фразу вслух. Она распознаётся и проверяется как в звонке: что услышано, сколько слов распознано верно, верно ли предупреждение. Проверьте и в шумном зале.',
+  'dg.rec': 'Читать и записать', 'dg.stop': 'Стоп и проверка', 'dg.busy': 'Проверка…', 'dg.heard': 'Услышано', 'dg.acc': 'Точность слов', 'dg.verdict': 'Итог', 'dg.ok': 'верно', 'dg.bad': 'неверно', 'dg.scam': 'мошенничество', 'dg.legit': 'обычный' },
  en: { 'pp.title': 'Call a teammate (2 phones)', 'pp.b': 'Two phones, the same app, the same Wi-Fi. A calls and plays the scammer, B answers. Scam Guardian checks the caller\'s real voice on B\'s phone.',
   'pp.consent': 'I agree that my speech in this call is transcribed and checked live. Audio is not recorded; we say no real card numbers or codes.',
   'pp.asA': 'A: Caller', 'pp.asB': 'B: Receiver', 'pp.code': 'Code', 'pp.join': 'Join', 'pp.ring': 'Call', 'pp.cancel': 'Cancel',
@@ -37,7 +41,9 @@ const CSTR = {
   'pp.declined': 'Call declined', 'pp.ended': 'Call ended', 'pp.lost': 'Connection lost', 'pp.peerAway': 'The other phone lost connection, waiting…',
   'pp.s.calling': 'Calling…', 'pp.s.connecting': 'Connecting…', 'pp.s.connected': 'Connected', 'pp.s.reconnecting': 'Reconnecting…', 'pp.s.error': 'No connection', 'pp.s.muted': 'Microphone off',
   'pp.callerNote': 'You are the caller. Scam Guardian checks this call on the other phone.', 'pp.aiOff': 'AI unavailable: rules only', 'pp.sttOff': 'Speech recognition unavailable',
-  'pp.teammate': 'Teammate', 'pp.number': 'Scam Guardian call', 'pp.noRtc': 'This device does not support WebRTC', 'pp.connMs': 'Voice connection', 'pp.warnMs': 'Warning after the words' }
+  'pp.teammate': 'Teammate', 'pp.number': 'Scam Guardian call', 'pp.noRtc': 'This device does not support WebRTC', 'pp.connMs': 'Voice connection', 'pp.warnMs': 'Warning after the words', 'pp.unclear': 'speech unclear (not checked)',
+  'dg.title': 'Speech test', 'dg.b': 'Read the sentence aloud. It is transcribed and checked exactly as in a call: what was heard, how many words were right, and whether the warning is right. Try it in the noisy hall too.',
+  'dg.rec': 'Read and record', 'dg.stop': 'Stop and check', 'dg.busy': 'Checking…', 'dg.heard': 'Heard', 'dg.acc': 'Word accuracy', 'dg.verdict': 'Result', 'dg.ok': 'correct', 'dg.bad': 'wrong', 'dg.scam': 'scam', 'dg.legit': 'normal' }
 };
 for (const l of Object.keys(CSTR)) Object.assign(STR[l], CSTR[l]);
 
@@ -101,6 +107,11 @@ function onMessage(m) {
     case 'error': snack(m.message || m.code); if (m.code === 'no_room' && P.status === 'idle') paintCard(); if (!P.code) { closeSocket(); } break;
     /* ---- analysis results: only the protected phone gets these ---- */
     case 'line': onLine(m); break;
+    case 'unclear': if (c && state.call === c && c.phase === 'listening' && m.session === P.session) {
+      const lis = $('#listening');
+      if (lis) lis.insertAdjacentHTML('beforebegin', `<li class="line who-${m.who} interim"><div class="who">${m.who === 'you' ? t('call.you') : esc(callee().name || t('call.caller'))}</div><p>… ${t('pp.unclear')}</p></li>`);
+      timeline('note', t('pp.unclear'), (m.who === 'you' ? t('call.you') : t('call.caller')) + ` · ${(m.t0 / 1000).toFixed(1)}–${(m.t1 / 1000).toFixed(1)} s`);
+    } break;
     case 'rules': break;
     case 'aiStart': if (c && state.call === c) { c.ai.status = 'checking'; refreshLive(); } break;
     case 'ai': if (c && state.call === c) {
@@ -167,6 +178,15 @@ openCall = function (who) {   /* eslint-disable-line no-global-assign */
   }
 };
 
+/* Android WebView (Chromium): platform echo cancellation, noise suppression and gain control; voice isolation
+ * where the device offers it. A wired or Bluetooth headset is used automatically when connected and is the best
+ * option in a loud hall (the mic is at the mouth, the other voice is not played into the room). */
+function micConstraints() {
+  const sup = (navigator.mediaDevices.getSupportedConstraints && navigator.mediaDevices.getSupportedConstraints()) || {};
+  const c = { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 };
+  if (sup.voiceIsolation) c.voiceIsolation = true;
+  return c;
+}
 async function micPermission() {
   if (!SGN.on) return true;
   return new Promise(ok => { const tm = setTimeout(() => ok(false), 20000); window.SGNative.onMicPermission = g => { clearTimeout(tm); ok(!!g); }; SGN.send({ type: 'mic-permission' }); });
@@ -176,7 +196,7 @@ async function startRtc(isCaller) {
   if (!window.RTCPeerConnection) { snack(t('pp.noRtc')); return; }
   try {
     if (!(await micPermission())) throw new Error('denied');
-    P.local = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
+    P.local = await navigator.mediaDevices.getUserMedia({ audio: micConstraints() });
   } catch (e) { snack(t('lv.noMic')); timeline('note', t('lv.noMic'), e.name || e.message); send({ type: 'hangup' }); return; }
   if (!P.c) { P.local.getTracks().forEach(tr => tr.stop()); return; }
   if (P.c.mute) P.local.getAudioTracks().forEach(tr => { tr.enabled = false; });
@@ -330,6 +350,65 @@ window.lineExtra = function (l) {
   return _lineExtra ? _lineExtra(l) : '';
 };
 
+/* ------------------------------------------------------------------ speech diagnostic */
+/* Read a known sentence: the recording (same mic settings as a call) goes through the call's streaming
+ * speech-to-text and the same scam check; shows what was heard, word accuracy and the verdict. */
+const DG = { ref: 1, sentences: null, rec: null, busy: false, res: null, err: '' };
+function wav16(samples) {
+  const buf = new ArrayBuffer(44 + samples.length * 2), v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + samples.length * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, 16000, true); v.setUint32(28, 32000, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  w(36, 'data'); v.setUint32(40, samples.length * 2, true);
+  for (let i = 0; i < samples.length; i++) v.setInt16(44 + i * 2, samples[i], true);
+  return new Blob([buf], { type: 'audio/wav' });
+}
+async function dgStart() {
+  if (DG.rec || DG.busy) return;
+  try {
+    if (!(await micPermission())) throw new Error('denied');
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: micConstraints() });   /* same settings as a call */
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = ctx.createMediaStreamSource(stream), proc = ctx.createScriptProcessor(4096, 1, 1);
+    const mute = ctx.createGain(); mute.gain.value = 0;
+    const ratio = ctx.sampleRate / 16000, chunks = [];
+    let pos = 0;
+    proc.onaudioprocess = e => {
+      const d = e.inputBuffer.getChannelData(0);
+      while (pos + ratio <= d.length) { let s2 = 0; const a = Math.floor(pos), b = Math.floor(pos + ratio); for (let i = a; i < b; i++) s2 += d[i]; s2 /= (b - a) || 1; chunks.push(Math.max(-32768, Math.min(32767, Math.round(s2 * 32767)))); pos += ratio; }
+      pos -= d.length;
+    };
+    src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
+    DG.rec = { stream, ctx, src, proc, chunks }; DG.res = null; DG.err = '';
+    paintDiag();
+    setTimeout(() => { if (DG.rec) dgStop(); }, 20000);
+  } catch (e) { DG.err = t('lv.noMic'); paintDiag(); }
+}
+async function dgStop() {
+  const r = DG.rec; if (!r) return;
+  DG.rec = null;
+  try { r.proc.onaudioprocess = null; r.proc.disconnect(); r.src.disconnect(); } catch (e) {}
+  r.stream.getTracks().forEach(tr => tr.stop()); try { r.ctx.close(); } catch (e) {}
+  DG.busy = true; paintDiag();
+  try { DG.res = await window.SGapi('/api/diag-stt?ref=' + DG.ref, { method: 'POST', body: wav16(r.chunks), headers: { 'Content-Type': 'audio/wav' }, timeoutMs: 40000 }); }
+  catch (e) { DG.err = e.message; }
+  DG.busy = false; paintDiag();
+}
+function diagInner() {
+  if (!HAS_SERVER()) return `<div class="lb-note" role="note">${ic('info')}<span>${t('pp.need')}</span></div>`;
+  if (!DG.sentences) { DG.sentences = []; window.SGapi('/api/diag-stt', { timeoutMs: 6000 }).then(d => { DG.sentences = d.sentences; paintDiag(); }).catch(e => { DG.err = e.message; paintDiag(); }); }
+  const list = DG.sentences, cur = list.find(x => x.id === DG.ref), r = DG.res;
+  return `<div class="chips lv-chips" role="group">${list.map(x => `<button class="fchip" data-action="dgRef" data-id="${x.id}" aria-pressed="${x.id === DG.ref}">${x.id} · ${t(x.kind === 'scam' ? 'dg.scam' : 'dg.legit')}</button>`).join('')}</div>
+    ${cur ? `<p class="dg-say">«${esc(cur.text)}»</p>` : ''}
+    <div class="lb-row"><button class="lb-btn ${DG.rec ? '' : 'green'}" data-action="${DG.rec ? 'dgStop' : 'dgStart'}" ${DG.busy || !cur ? 'disabled' : ''}>${ic(DG.rec ? 'x' : 'mic')}${DG.busy ? t('dg.busy') : DG.rec ? t('dg.stop') : t('dg.rec')}</button></div>
+    ${DG.err ? `<p class="hint" style="text-align:left">${esc(DG.err)}</p>` : ''}
+    ${r ? `<table class="tech" style="margin-top:10px">
+      <tr><th>${t('dg.heard')}</th><td>${esc(r.heard || '—')}</td></tr>
+      <tr><th>${t('dg.acc')}</th><td><b>${Math.round(r.accuracy * 100)}%</b> · ${esc(r.stt.model)} (${esc(r.stt.languages.join(', '))}) · ${msTxt(r.stt.afterSpeechMs)}</td></tr>
+      <tr><th>${t('dg.verdict')}</th><td>${t('risk.' + r.verdict.level)} · ${r.verdict.tactics.map(x => esc(x)).join(', ') || '—'} · <b>${t(r.correct ? 'dg.ok' : 'dg.bad')}</b>${r.verdict.aiModel ? ' · ' + esc(r.verdict.aiModel) + ' ' + msTxt(r.verdict.aiMs) : r.verdict.aiError ? ' · AI: ' + esc(r.verdict.aiError) : ''}</td></tr></table>` : ''}`;
+}
+function paintDiag() { const b = document.getElementById('dgBox'); if (b) b.innerHTML = diagInner(); }
+
 /* ------------------------------------------------------------------ Lab card */
 function cardInner() {
   if (!HAS_SERVER()) return `<div class="lb-note" role="note">${ic('info')}<span>${t('pp.need')}</span></div>`;
@@ -355,7 +434,8 @@ function lastHTML() {
 const _lab = R.lab;
 R.lab = function () {
   const h = _lab();
-  const card = `<div class="lb-card"><h2>${ic('users')}${t('pp.title')}</h2><p>${t('pp.b')}</p><div id="ppBox">${cardInner()}</div>${lastHTML()}</div>`;
+  const card = `<div class="lb-card"><h2>${ic('users')}${t('pp.title')}</h2><p>${t('pp.b')}</p><div id="ppBox">${cardInner()}</div>${lastHTML()}</div>`
+    + `<div class="lb-card"><h2>${ic('mic')}${t('dg.title')}</h2><p>${t('dg.b')}</p><div id="dgBox">${diagInner()}</div></div>`;
   const i = h.indexOf('<h2 class="lb-sec">');
   return i < 0 ? h + card : h.slice(0, i) + card + h.slice(i);
 };
@@ -368,6 +448,9 @@ Object.assign(A, {
     openSocket({ type: 'join', code, consent: true, name: 'B' });
   },
   ppRing() { ring(); },
+  dgRef(el) { DG.ref = +el.dataset.id; DG.res = null; paintDiag(); },
+  dgStart() { dgStart(); },
+  dgStop() { dgStop(); },
   ppCancel() { send({ type: 'hangup' }); reset(); paintCard(); }
 });
 document.addEventListener('change', e => { if (e.target.id === 'ppConsent') P.consent = e.target.checked; });

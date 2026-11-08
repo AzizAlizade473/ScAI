@@ -211,7 +211,7 @@
     const out = await withFallback(modelList(opts.model, STT_MODELS), async model => {
       const dedicated = /transcribe/.test(model);
       const parts = [{ inlineData: { mimeType: opts.mimeType || 'audio/wav', data: opts.audioBase64 } }];
-      if (!dedicated) parts.push({ text: 'Transcribe this phone-call audio verbatim in its original language (Azerbaijani, Russian or English). Output only the transcript text, nothing else.' });
+      if (!dedicated) parts.push({ text: 'Transcribe this phone-call audio verbatim. The speaker most likely speaks Azerbaijani (Latin script with ə, ı, ö, ü, ğ, ş, ç): use Azerbaijani spelling, never Turkish spelling. Russian or English only if clearly spoken. Output only the transcript text. If a part is unintelligible, write [?] there instead of guessing.' });
       const json = await post(opts, model, { contents: [{ role: 'user', parts }] }, opts.timeoutMs || 15000);
       const ps = (json.candidates && json.candidates[0] && json.candidates[0].content && json.candidates[0].content.parts) || [];
       const text = ps.map(p => (p.audioTranscription && p.audioTranscription.text) || (!p.thought && p.text) || '').join(' ').replace(/\s+/g, ' ').trim();

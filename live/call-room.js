@@ -13,6 +13,8 @@
  * The caller's phone never sends transcripts, verdicts or analysis audio: the server analyses what the
  * protected person actually hears. Speakers are never mixed: each track has its own VAD and segments. */
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 const ScamCheck = require('../scam-check.js');
 const { EnergyVad, pcmToWav } = require('./vad');
 const { ThreatDetector } = require('./detector');
@@ -26,6 +28,7 @@ const MAX_ROOMS = 20;
 const MAX_CALL_SEC = 15 * 60;
 const SEG_MAX_MS = 8000;                     /* long speech is cut into segments of at most 8 s */
 const SEG_MIN_MS = 350;
+const DEBUG = !!process.env.SG_CALL_DEBUG;
 /** @type {Map<string, Room>} */
 const rooms = new Map();
 
@@ -90,6 +93,8 @@ class CallAnalyzer {
     this.cur = { caller: null, you: null };
     this.streamWall = { caller: 0, you: 0 };
     this.restarts = { caller: 0, you: 0 };
+    /** @type {{caller: Buffer[], you: Buffer[]}} */
+    this.debugAudio = { caller: [], you: [] };
     /** wall time of each speaker's last voiced audio (server energy VAD): latency is measured from here */
     this.lastVoice = { caller: 0, you: 0 };
     this._startStream('caller'); this._startStream('you');
@@ -160,11 +165,15 @@ class CallAnalyzer {
     clearTimeout(item.timer);
     if (!item.t1) item.t1 = this.now();
     const text = String(item.text || '').replace(/\s+/g, ' ').trim();
+    if (!text && this.enabled && item.t1 - item.t0 >= 1200 && !item.batch) item.unclear = true;   /* speech was heard but not understood */
     if (text && this.enabled) {
       const fin = item.finalAt || Date.now(), lv = this.lastVoice[/** @type {'caller'|'you'} */ (item.who)];
-      item.endWall = lv && lv <= fin && lv >= this.t0 + item.t0 ? lv : this.t0 + item.t1;   /* when the speaker really stopped */
-      const sttMs = Math.max(0, fin - item.endWall);
-      this.sttMs.push(sttMs); this.usage.stt.calls++;
+      const measured = !!(lv && lv <= fin && lv >= this.t0 + item.t0);
+      item.endWall = measured ? lv : this.t0 + item.t1;              /* when the speaker really stopped */
+      /* a sentence split inside continuous speech has no measurable pause: no latency figure rather than a false one */
+      const sttMs = measured ? Math.max(0, fin - item.endWall) : null;
+      if (sttMs != null) this.sttMs.push(sttMs);
+      this.usage.stt.calls++;
       item.line = { who: item.who, text: maskDigits(text), t0: item.t0, t1: item.t1, sttMs, model: STREAM_MODEL };
     }
     item.done = true;
@@ -174,6 +183,7 @@ class CallAnalyzer {
   /** @param {'caller'|'you'} who @param {Buffer} pcm */
   push(who, pcm) {
     if (this.closed || !this.enabled || pcm.length % 2 || pcm.length > 64000) return;
+    if (DEBUG) { const d = this.debugAudio[who]; if (d.length < 6000) d.push(Buffer.from(pcm)); }   /* ≤ 10 min, local debug only */
     if (this.mode[who] === 'stream') {
       for (const e of this.vad[who].push(pcm)) if (e.type === 'end') this.lastVoice[who] = Date.now() - this.vad[who].endFrames * 20;
       this._streamPush(who, pcm); return;
@@ -217,9 +227,11 @@ class CallAnalyzer {
   _flush() {
     while (this.queue.length && this.queue[0].done) {
       const it = /** @type {any} */ (this.queue.shift());
+      if (it.unclear && !this.closed) { this.o.emit({ type: 'unclear', who: it.who, t0: it.t0, t1: it.t1 }); if (DEBUG) console.log(`[call] ${this.o.session} ${it.who.padEnd(6)} (unclear ${it.t1 - it.t0} ms)`); }
       if (!it.line || this.closed) continue;
       const line = Object.assign({ id: ++this.lineId, at: it.t1, source: it.line.model + (it.line.model === STREAM_MODEL ? ' (stream)' : ' (STT)'), cut: false }, it.line);
       this.o.emit(Object.assign({ type: 'line' }, line));
+      if (DEBUG) console.log(`[call] ${this.o.session} ${line.who.padEnd(6)} ${(line.t0 / 1000).toFixed(1)}-${(line.t1 / 1000).toFixed(1)}s +${line.sttMs}ms ${line.text}`);
       if (line.who === 'caller') this.lastCallerEnd = it.endWall || this.t0 + it.t1;   /* wall time when the caller stopped saying these words */
       this.detector.addLine({ id: line.id, who: line.who, text: line.text, at: line.at, source: line.source });
     }
@@ -242,6 +254,13 @@ class CallAnalyzer {
   }
   close() {
     this.closed = true; this.detector.close();
+    if (DEBUG) {   /* SG_CALL_DEBUG=1: the exact audio each speaker's transcription received, for diagnosis (git-ignored data/) */
+      try {
+        const dir = path.join(__dirname, '..', 'data', 'debug-audio'); fs.mkdirSync(dir, { recursive: true });
+        for (const w of /** @type {('caller'|'you')[]} */ (['caller', 'you'])) if (this.debugAudio[w].length) fs.writeFileSync(path.join(dir, `${this.o.session}-${w}.wav`), pcmToWav(Buffer.concat(this.debugAudio[w]), 16000));
+        console.log(`[call] debug audio saved in data/debug-audio/${this.o.session}-*.wav`);
+      } catch (e) { console.log('[call] debug audio not saved: ' + /** @type {Error} */ (e).message); }
+    }
     for (const w of /** @type {('caller'|'you')[]} */ (['caller', 'you'])) { const s = this.stream[w]; if (s) s.close(); this.stream[w] = null; }
     for (const it of this.queue) clearTimeout(it.timer);
   }

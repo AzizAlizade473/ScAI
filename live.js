@@ -89,7 +89,8 @@ class MicCapture {
     this.pre = []; this.onSpeech = null; this.onBargeIn = null;
   }
   async open() {
-    this.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
+    const sup = (navigator.mediaDevices.getSupportedConstraints && navigator.mediaDevices.getSupportedConstraints()) || {};
+    this.stream = await navigator.mediaDevices.getUserMedia({ audio: Object.assign({ echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }, sup.voiceIsolation ? { voiceIsolation: true } : {}) });
     const src = this.ctx.createMediaStreamSource(this.stream);
     this.proc = this.ctx.createScriptProcessor(2048, 1, 1);
     this.ratio = this.ctx.sampleRate / 16000; this.pos = 0;

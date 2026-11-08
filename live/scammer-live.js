@@ -139,7 +139,7 @@ class LiveScammer extends EventEmitter {
       systemInstruction: { parts: [{ text: Personas.systemPrompt(this.persona) }] },
       tools: [END_CALL_TOOL],
       sessionResumption: handle ? { handle } : {},
-      inputAudioTranscription: {},
+      inputAudioTranscription: { languageCodes: String(process.env.STT_LANGS || 'az-AZ').split(',').map(s => s.trim()).filter(Boolean) },   /* see stt-stream.js */
       outputAudioTranscription: {},
       realtimeInputConfig: {
         automaticActivityDetection: { prefixPaddingMs: 200, silenceDurationMs: 700 },

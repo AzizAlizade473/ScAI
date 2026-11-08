@@ -7,6 +7,13 @@ const { EventEmitter } = require('events');
 
 const URL_ = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent';
 const MODEL = 'gemini-3.5-transcribe-live';
+/* Without a language the model guesses per sentence and often writes Azerbaijani as Turkish ("Bu kadar pulu")
+ * or another language. Measured 8 Nov 2026: with az-AZ the same clips come out in correct Azerbaijani.
+ * STT_LANGS=az-AZ,ru-RU adds Russian if a caller may speak it. */
+/* End of speech: high sensitivity, 500 ms. Measured with hall babble that keeps going after the speaker stops:
+ * the default waited for the whole turn (text 2.1-2.6 s after it); this ends at each sentence, so the first
+ * sentence's text came 3.5 s earlier, with the same words. */
+const LANGS = String(process.env.STT_LANGS || 'az-AZ').split(',').map(s => s.trim()).filter(Boolean);
 const offsetMs = (/** @type {any} */ s) => Math.round(parseFloat(String(s || '0').replace('s', '')) * 1000) || 0;
 
 class StreamingStt extends EventEmitter {
@@ -27,7 +34,7 @@ class StreamingStt extends EventEmitter {
       ws.binaryType = 'arraybuffer';
       let ready = false;
       const timer = setTimeout(() => { try { ws.close(); } catch { /* */ } reject(new Error(this.model + ': setup timed out')); }, this.timeoutMs);
-      ws.onopen = () => ws.send(JSON.stringify({ setup: { model: 'models/' + this.model, inputAudioTranscription: {} } }));
+      ws.onopen = () => ws.send(JSON.stringify({ setup: { model: 'models/' + this.model, inputAudioTranscription: { languageCodes: LANGS }, realtimeInputConfig: { automaticActivityDetection: { endOfSpeechSensitivity: 'END_SENSITIVITY_HIGH', silenceDurationMs: 500 } } } }));
       ws.onmessage = ev => {
         let m; try { m = JSON.parse(typeof ev.data === 'string' ? ev.data : new TextDecoder().decode(/** @type {ArrayBuffer} */ (ev.data))); } catch { return; }
         if (!ready) { if (m.setupComplete) { ready = true; clearTimeout(timer); this.ws = ws; resolve(undefined); } return; }
@@ -56,4 +63,4 @@ class StreamingStt extends EventEmitter {
   close() { this.byUs = true; if (this.ws) { try { this.ws.close(1000); } catch { /* */ } this.ws = null; } }
 }
 
-module.exports = { StreamingStt, STREAM_MODEL: MODEL };
+module.exports = { StreamingStt, STREAM_MODEL: MODEL, STT_LANGS: LANGS };

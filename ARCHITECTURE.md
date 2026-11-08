@@ -205,6 +205,17 @@ links. The personas are fictional. Max 7 minutes per call, 3 calls per server, 2
   speaker stopped; AI verdict p50 2.3–2.4 s; first warning 3.9 s after the caller's words on the emulator.
   A scam call (card number, SMS code, secrecy) reached danger with the warning; a real-bank call stayed safe.
   Not yet tested on two physical phones.
+- **Speech recognition accuracy (fixed 8 November 2026).** Root cause of wrong Azerbaijani text: the streaming
+  transcription had no language set, so it guessed per sentence (Turkish spellings like "Bu kadar pulu",
+  sometimes Italian). Now `languageCodes: ['az-AZ']` (`STT_LANGS` to add Russian) and a sensitive end of speech
+  (500 ms) that ends at each sentence. The detector reads exactly these transcripts, so it improves with them.
+  Measured on recorded speech: quiet 80-88 % of words exact (most "errors" are "on altı" written as "16");
+  with crowd noise and a long echo at 10 dB every line of a scam call was exact and the warning came 3.3 s after the
+  words; at 3-5 dB words are lost but the scam / normal verdict was still right in all 6 test recordings.
+  Speech the model hears but cannot transcribe is shown as "səs aydın deyil" and is not analysed.
+- **Speech test** (Lab → Səs testi): read a given sentence on the phone; it runs through the same streaming
+  transcription and detector and shows what was heard, word accuracy and whether the verdict is right.
+  `SG_CALL_DEBUG=1` saves each speaker's analysed audio to `data/debug-audio/` (git-ignored) and logs every line.
 
 ## 3. Detection pipeline
 
