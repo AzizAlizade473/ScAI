@@ -28,6 +28,7 @@ class LiveScammer extends EventEmitter {
    * @param {import('./types').Persona} o.persona
    * @param {string[]} [o.models]
    * @param {number} [o.connectTimeoutMs]
+   * @param {() => string} [o.history]   transcript so far, used only if a dropped session cannot be resumed
    */
   constructor(o) {
     super();
@@ -40,6 +41,10 @@ class LiveScammer extends EventEmitter {
     /** @type {WebSocket | null} */
     this.ws = null;
     this.closedByUs = false;
+    this.history = o.history || (() => '');
+    /** latest session-resumption handle: lets a dropped connection continue the same conversation */
+    this.handle = '';
+    this.recovering = false;
   }
 
   /** Tries each Live model until one completes setup. */
@@ -64,14 +69,14 @@ class LiveScammer extends EventEmitter {
     throw lastErr;
   }
 
-  /** @param {string} model */
-  _open(model) {
+  /** @param {string} model @param {string} [handle] */
+  _open(model, handle) {
     return new Promise((resolve, reject) => {
       const ws = new WebSocket(LIVE_URL + '?key=' + encodeURIComponent(this.apiKey));
       ws.binaryType = 'arraybuffer';
       let ready = false;
       const timer = setTimeout(() => { try { ws.close(); } catch { /* */ } reject(new Error(model + ': setup timed out')); }, this.connectTimeoutMs);
-      ws.onopen = () => ws.send(JSON.stringify({ setup: this._setup(model) }));
+      ws.onopen = () => ws.send(JSON.stringify({ setup: this._setup(model, handle) }));
       ws.onmessage = ev => {
         let m;
         try { m = JSON.parse(typeof ev.data === 'string' ? ev.data : new TextDecoder().decode(/** @type {ArrayBuffer} */ (ev.data))); } catch { return; }
@@ -84,15 +89,46 @@ class LiveScammer extends EventEmitter {
       ws.onclose = ev => {
         clearTimeout(timer);
         if (!ready) { reject(new Error(model + ': ' + (ev.reason || 'closed ' + ev.code))); return; }
-        if (this.ws === ws) this.ws = null;
-        this.emit('closed', { code: ev.code, reason: ev.reason || '', byUs: this.closedByUs });
+        if (this.ws === ws) this.ws = null; else return;   /* an old socket after a reconnect */
+        if (this.closedByUs) { this.emit('closed', { code: ev.code, reason: ev.reason || '', byUs: true }); return; }
+        this._recover({ code: ev.code, reason: ev.reason || '' });
       };
       ws.onerror = () => { /* onclose follows with the reason */ };
     });
   }
 
-  /** @param {string} model */
-  _setup(model) {
+  /* An unexpected drop (network, 1006, goAway): reconnect without ending the call.
+   * 1. the same model with the resumption handle, so the conversation keeps its memory (2 tries);
+   * 2. otherwise any Live model, primed with the transcript so far as a stage direction. */
+  /** @param {{code: number, reason: string}} info */
+  async _recover(info) {
+    if (this.recovering) return;
+    this.recovering = true;
+    this.emit('reconnecting', info);
+    const t0 = Date.now();
+    try {
+      if (this.handle) {
+        for (let i = 0; i < 2 && !this.closedByUs; i++) {
+          try { await this._open(this.model, this.handle); this.emit('reconnected', { model: this.model, resumed: true, ms: Date.now() - t0 }); return; }
+          catch { await new Promise(r => setTimeout(r, 400)); }
+        }
+      }
+      if (this.closedByUs) return;
+      const prev = this.model;
+      await this.connect();
+      const h = this.history();
+      this.direct('[Əlaqə qısa kəsildi və bərpa olundu. Bu, eyni zəngdir; yenidən salamlaşma. İndiyə qədərki danışıq:\n' + h + '\nDanışığı qaldığın yerdən davam et.]');
+      this.emit('reconnected', { model: this.model, resumed: false, from: prev, ms: Date.now() - t0 });
+    } catch (e) {
+      this.emit('closed', { code: info.code, reason: info.reason || /** @type {Error} */ (e).message, byUs: false });
+    } finally { this.recovering = false; }
+  }
+
+  /** test only: drop the upstream connection as the network would */
+  testDrop() { if (this.ws) this.ws.close(4000, 'test drop'); }
+
+  /** @param {string} model @param {string} [handle] */
+  _setup(model, handle) {
     return {
       model: 'models/' + model,
       generationConfig: {
@@ -102,6 +138,7 @@ class LiveScammer extends EventEmitter {
       },
       systemInstruction: { parts: [{ text: Personas.systemPrompt(this.persona) }] },
       tools: [END_CALL_TOOL],
+      sessionResumption: handle ? { handle } : {},
       inputAudioTranscription: {},
       outputAudioTranscription: {},
       realtimeInputConfig: {
@@ -130,6 +167,8 @@ class LiveScammer extends EventEmitter {
         if (f.name === 'end_call') this.emit('endCall', String((f.args && f.args.reason) || ''));
       }
     }
+    if (m.sessionResumptionUpdate && m.sessionResumptionUpdate.resumable && m.sessionResumptionUpdate.newHandle) this.handle = m.sessionResumptionUpdate.newHandle;
+    if (m.usageMetadata) this.emit('usage', m.usageMetadata);   /* per turn: the whole context is billed again as prompt */
     if (m.goAway) this.emit('error', new Error('Live session ending soon (' + (m.goAway.timeLeft || '?') + ')'));
   }
 

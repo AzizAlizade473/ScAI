@@ -71,6 +71,8 @@ class LiveCallSession {
     /** @type {Buffer[]} */ this.segs = [];
     /** lines are emitted in order even when the user's transcript is still being produced */
     /** @type {Promise<void>} */ this.lineQueue = Promise.resolve();
+    /* token use, as reported by Gemini for this call (for budgeting) */
+    this.usage = { live: { turns: 0, promptText: 0, promptAudio: 0, responseAudio: 0, responseText: 0, thoughts: 0 }, stt: { calls: 0, prompt: 0, response: 0 }, detector: { calls: 0, prompt: 0, response: 0 } };
     this.state = 'connecting';
     this.started = false;
     active.add(this);
@@ -114,7 +116,7 @@ class LiveCallSession {
     /** @type {any} */
     let agent = null, info = null, fellBack = '';
     if (want === 'auto') {
-      agent = new LiveScammer({ apiKey: this.o.apiKey, persona, models: m.models });
+      agent = new LiveScammer({ apiKey: this.o.apiKey, persona, models: m.models, history: () => this.lines.slice(-16).map(l => (l.who === 'you' ? 'Abonent: ' : 'Sən: ') + l.text).join('\n') });
       try { info = await agent.connect(); }
       catch (e) { fellBack = /** @type {Error} */ (e).message; agent = null; }
     }
@@ -187,9 +189,28 @@ class LiveCallSession {
       if (!this.awaitPlayed) this._played();                   /* text-only turn: nothing to wait for */
     });
     a.on('metrics', /** @param {import('./types').StageMetrics} m */ m => { this.pendingStages = m; });
+    a.on('usage', /** @param {any} u */ u => {
+      const L = this.usage.live; L.turns++;
+      for (const d of u.promptTokensDetails || []) { if (d.modality === 'AUDIO') L.promptAudio += d.tokenCount | 0; else L.promptText += d.tokenCount | 0; }
+      for (const d of u.responseTokensDetails || []) { if (d.modality === 'AUDIO') L.responseAudio += d.tokenCount | 0; else L.responseText += d.tokenCount | 0; }
+      L.thoughts += u.thoughtsTokenCount | 0;
+    });
     a.on('ttsUnavailable', msg => this.notice('tts_unavailable', String(msg)));
     a.on('endCall', reason => { this.ending = String(reason || 'goodbye'); this.send({ type: 'callerEnding', reason: this.ending, t: this.now() }); this.timers.push(setTimeout(() => this.finish('caller_hung_up'), 15000)); });
     a.on('error', e => this.notice('agent_error', e.message));
+    a.on('reconnecting', info => {
+      this.reconnects = (this.reconnects || 0) + 1;
+      if (this.replyStarted || this.outBuf) this._finishCallerLine(true);
+      this.replyStarted = false;
+      this.notice('reconnecting', String(info.code));
+      this.setState('connecting');
+    });
+    a.on('reconnected', r => {
+      this.notice('reconnected', `${r.model}${r.resumed ? ' (resumed)' : ' (new session)'} · ${r.ms} ms`);
+      this.setState('listening');
+      this._armSilence();
+    });
+    if (process.env.SG_TEST_DROP_MS && a.testDrop) this.timers.push(setTimeout(() => a.testDrop && a.testDrop(), +process.env.SG_TEST_DROP_MS));   /* test only */
     a.on('closed', info => {
       if (this.ended || info.byUs) return;
       this.send({ type: 'error', code: 'upstream_closed', message: info.reason || 'The AI connection closed (' + info.code + ')' });
@@ -207,6 +228,7 @@ class LiveCallSession {
     d.on('aiStart', r => this.send({ type: 'aiStart', seq: r.seq, upToLine: r.upToLine }));
     d.on('ai', r => {
       this.aiMs.push(r.result.ms);
+      if (r.usage) { const D = this.usage.detector; D.calls++; D.prompt += r.usage.promptTokenCount | 0; D.response += (r.usage.candidatesTokenCount | 0) + (r.usage.thoughtsTokenCount | 0); }
       this.risk.setAI(r.result);
       this.send({ type: 'ai', seq: r.seq, upToLine: r.upToLine, result: r.result, t: this.now() });
       this._aggregate();
@@ -290,7 +312,7 @@ class LiveCallSession {
   _transcribe(pcm16k) {
     const timeout = new Promise(ok => setTimeout(() => ok(null), 5000));
     const run = ScamCheck.transcribe({ apiKey: this.o.apiKey, baseUrl: this.o.baseUrl, mimeType: 'audio/wav', audioBase64: pcmToWav(pcm16k, 16000).toString('base64'), timeoutMs: 5000 })
-      .then(/** @param {any} r */ r => ({ text: String(r.text || '').trim(), model: r.model, ms: r.ms }))
+      .then(/** @param {any} r */ r => { if (r.usage) { const S = this.usage.stt; S.calls++; S.prompt += r.usage.promptTokenCount | 0; S.response += r.usage.candidatesTokenCount | 0; } return { text: String(r.text || '').trim(), model: r.model, ms: r.ms }; })
       .catch(() => null);
     return Promise.race([run, timeout]).then(/** @param {any} x */ x => x);
   }
@@ -324,7 +346,8 @@ class LiveCallSession {
       replyMsP50: pct(reply, 0.5), replyMsP95: pct(reply, 0.95), sttLagMsP50: pct(stt, 0.5), mouthToEarMsP50: pct(m2e, 0.5),
       sttMsP50: pct(st('sttMs'), 0.5), llmMsP50: pct(st('llmMs'), 0.5), ttsMsP50: pct(st('ttsMs'), 0.5),
       aiMsP50: pct(this.aiMs, 0.5), aiRuns: this.aiMs.length, rulesMsP50: pct(this.rulesMs, 0.5),
-      level: this.risk.state.level, risk: this.risk.state.risk, tactics: this.risk.state.tactics
+      level: this.risk.state.level, risk: this.risk.state.risk, tactics: this.risk.state.tactics,
+      usage: this.usage, reconnects: this.reconnects || 0
     };
   }
 

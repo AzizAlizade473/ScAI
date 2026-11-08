@@ -58,6 +58,7 @@
  * @property {() => Promise<{model: string, ms: number}>} connect
  * @property {(pcm16k: Buffer) => void} sendAudio
  * @property {(text: string) => void} direct  stage direction (silence, wrap up); never spoken
+ * @property {() => void} [testDrop]   test only: drop the upstream connection
  * @property {() => void} close
  * @property {(ev: string, fn: (...a: any[]) => void) => any} on
  */

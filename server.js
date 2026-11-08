@@ -309,7 +309,9 @@ server.on('upgrade', (req, socket) => {
     onEnd: x => {
       liveByIp.set(ip, Math.max(0, (liveByIp.get(ip) || 1) - 1));
       const sum = x.summary();
-      console.log(`[live] ${x.id} ended · ${sum.mode} ${sum.model} · ${sum.turns} turns · reply p50 ${sum.replyMsP50} ms · ${sum.level}`);
+      const u = sum.usage, L = u.live;
+      console.log(`[live] ${x.id} ended · ${sum.mode} ${sum.model} · ${sum.turns} turns · ${sum.durationSec}s · reply p50 ${sum.replyMsP50} ms · ${sum.level} · reconnects ${sum.reconnects}`);
+      console.log(`[live] ${x.id} tokens · scammer in ${L.promptText}+${L.promptAudio} audio, out ${L.responseAudio} audio+${L.thoughts} thinking · STT ${u.stt.prompt}/${u.stt.response} · detector ${u.detector.prompt}/${u.detector.response}`);
     }
   });
   console.log(`[live] ${s.id} connected from ${ip}`);

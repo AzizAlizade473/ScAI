@@ -62,7 +62,7 @@ class ThreatDetector extends EventEmitter {
     this.emit('aiStart', { seq, upToLine: upTo });
     try {
       const result = await ScamCheck.classify({ apiKey: this.o.apiKey, baseUrl: this.o.baseUrl, model: this.o.model, kind: 'call', transcript, signals: this.o.signals, timeoutMs: 9000 });
-      if (!this.closed) this.emit('ai', { seq, upToLine: upTo, result });
+      if (!this.closed) this.emit('ai', { seq, upToLine: upTo, result, usage: result.usage || null });
     } catch (e) {
       if (!this.closed) this.emit('aiError', { seq, message: /** @type {Error} */ (e).message });
     } finally {

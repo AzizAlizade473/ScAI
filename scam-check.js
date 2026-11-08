@@ -163,10 +163,12 @@
   async function classifyOne(opts, model) {
     const t0 = Date.now();
     try {
-      return Object.assign(parse(await post(opts, model, buildBody(opts, false), opts.timeoutMs || 9000)), { model, ms: Date.now() - t0 });
+      const json = await post(opts, model, buildBody(opts, false), opts.timeoutMs || 9000);
+      return Object.assign(parse(json), { model, ms: Date.now() - t0, usage: json.usageMetadata || null });
     } catch (e) {
       if (e.status !== 400) throw e;
-      return Object.assign(parse(await post(opts, model, buildBody(opts, true), opts.timeoutMs || 9000)), { model, ms: Date.now() - t0 });
+      const json = await post(opts, model, buildBody(opts, true), opts.timeoutMs || 9000);
+      return Object.assign(parse(json), { model, ms: Date.now() - t0, usage: json.usageMetadata || null });
     }
   }
 
@@ -212,7 +214,7 @@
       const json = await post(opts, model, { contents: [{ role: 'user', parts }] }, opts.timeoutMs || 15000);
       const ps = (json.candidates && json.candidates[0] && json.candidates[0].content && json.candidates[0].content.parts) || [];
       const text = ps.map(p => (p.audioTranscription && p.audioTranscription.text) || (!p.thought && p.text) || '').join(' ').replace(/\s+/g, ' ').trim();
-      return { text, model };
+      return { text, model, usage: json.usageMetadata || null };
     });
     out.ms = Date.now() - t0;
     return out;
