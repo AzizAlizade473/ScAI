@@ -44,5 +44,14 @@
     "build:apk": "eas build --platform android --profile preview",
     "build:aab": "eas build --platform android --profile production"
   },
-  "private": true
+  "private": true,
+  "expo": {
+    "autolinking": {
+      "android": {
+        "exclude": [
+          "react-native-gesture-handler"
+        ]
+      }
+    }
+  }
 }
