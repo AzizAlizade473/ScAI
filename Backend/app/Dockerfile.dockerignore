@@ -1,0 +1,7 @@
+# Build context is the repo root: send only what the image needs.
+**/.env
+**/node_modules
+.git
+mobile
+data
+Backend/inbox

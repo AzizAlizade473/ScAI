@@ -13,7 +13,6 @@ const path = require('path');
 const crypto = require('crypto');
 const ScamCheck = require('./scam-check.js');
 const Rules = require('./rules.js');
-const { createStore } = require('./store.js');
 const LiveWs = require('./live/ws.js');
 const { LiveCallSession, MAX_SESSIONS } = require('./live/session.js');
 const { LIVE_MODELS, liveStatus } = require('./live/scammer-live.js');
@@ -21,6 +20,8 @@ const Personas = require('./live/personas.js');
 
 const ROOT = __dirname;
 loadEnv();
+// History store: MySQL when DB_HOST is set (Docker setup in Backend/), otherwise the JSON file in data/.
+const { createStore } = process.env.DB_HOST ? require('./Backend/app/store-mysql.js') : require('./store.js');
 const KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
 const MODEL = process.env.GEMINI_MODEL || ScamCheck.DEFAULT_MODEL;
 const STT_MODEL = process.env.GEMINI_STT_MODEL || ScamCheck.STT_MODELS[0];
@@ -143,13 +144,15 @@ async function analyze(b) {
     latency: { rulesMs, aiMs: ai ? ai.ms : null, totalMs: Date.now() - t0 }, model: ai ? ai.model : null
   };
   if (b.save !== false) {
-    const e = store.add({
-      kind: b.source === 'voice' ? 'voice' : 'message', source: String(b.source || 'check').slice(0, 20), lang: String(b.lang || '').slice(0, 2),
-      textRedacted: out.textRedacted.slice(0, 1000), level: fused.level, risk: fused.risk, rulesRisk: rules.risk, aiRisk: ai ? ai.risk : null,
-      tactics: [...new Set(rules.tactics.concat(ai ? ai.tactics : []))], scamType: ai ? ai.scamType : null,
-      reason: ai ? ai.reason : null, model: out.model, latencyMs: out.latency.totalMs
-    });
-    out.id = e.id;
+    try {
+      const e = await store.add({
+        kind: b.source === 'voice' ? 'voice' : 'message', source: String(b.source || 'check').slice(0, 20), lang: String(b.lang || '').slice(0, 2),
+        textRedacted: out.textRedacted.slice(0, 1000), level: fused.level, risk: fused.risk, rulesRisk: rules.risk, aiRisk: ai ? ai.risk : null,
+        tactics: [...new Set(rules.tactics.concat(ai ? ai.tactics : []))], scamType: ai ? ai.scamType : null,
+        reason: ai ? ai.reason : null, model: out.model, latencyMs: out.latency.totalMs
+      });
+      out.id = e.id;
+    } catch (err) { console.error('[store]', err.message); }   // the verdict still goes back if saving fails
   }
   return out;
 }
@@ -171,8 +174,10 @@ const server = http.createServer(async (req, res) => {
     if (req.method !== 'GET' && req.method !== 'HEAD') sameOrigin(req);
 
     if (req.method === 'GET' && p === '/api/health') {
+      let history = null;
+      try { history = (await store.stats()).total; } catch (e) { console.error('[store]', e.message); }
       return send(res, 200, {
-        gemini: Boolean(KEY), model: MODEL, fallbacks: ScamCheck.FALLBACK_MODELS, stt: STT_MODEL, tts: TTS_MODEL, store: true, history: store.stats().total, cooling: ScamCheck.status(),
+        gemini: Boolean(KEY), model: MODEL, fallbacks: ScamCheck.FALLBACK_MODELS, stt: STT_MODEL, tts: TTS_MODEL, store: history !== null, history, cooling: ScamCheck.status(),
         live: { available: Boolean(KEY), path: '/api/live', models: LIVE_MODELS, fallback: 'stt → llm → tts', detector: MODEL, personas: Personas.publicList(), active: LiveCallSession.activeCount(), max: MAX_SESSIONS, cooling: liveStatus() }
       });
     }
@@ -221,11 +226,11 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, wav, 'audio/wav', { 'X-TTS-Model': r.model, 'X-TTS-Ms': String(r.ms) });
     }
     if (p === '/api/history') {
-      if (req.method === 'GET') return send(res, 200, { items: store.list(Math.min(500, +url.searchParams.get('limit') || 100)), stats: store.stats() });
-      if (req.method === 'DELETE') { store.clear(); return send(res, 200, { ok: true }); }
+      if (req.method === 'GET') return send(res, 200, { items: await store.list(Math.min(500, +url.searchParams.get('limit') || 100)), stats: await store.stats() });
+      if (req.method === 'DELETE') { await store.clear(); return send(res, 200, { ok: true }); }
       if (req.method === 'POST') {                                     // a finished call: alert metadata only
         const b = await readJson(req);
-        const e = store.add({
+        const e = await store.add({
           kind: 'call', simulated: true, scenario: String(b.scenario || '').slice(0, 40),
           level: LEVELS.includes(b.level) ? b.level : 'safe', risk: Math.max(0, Math.min(1, +b.risk || 0)),
           tactics: (Array.isArray(b.tactics) ? b.tactics : []).map(String).filter(t => /^[a-z_]{2,30}$/.test(t)).slice(0, 10),
@@ -237,20 +242,30 @@ const server = http.createServer(async (req, res) => {
       }
     }
     const m = p.match(/^\/api\/history\/([a-f0-9]{16})$/);
-    if (m && req.method === 'DELETE') return send(res, store.remove(m[1]) ? 200 : 404, { ok: true });
+    if (m && req.method === 'DELETE') return send(res, (await store.remove(m[1])) ? 200 : 404, { ok: true });
     if (req.method === 'POST' && p === '/api/feedback') {
       const b = await readJson(req);
       if (!['correct', 'wrong'].includes(b.verdict)) throw fail(400, 'verdict must be "correct" or "wrong"');
-      const entry = store.get(String(b.id || ''));
+      const entry = await store.get(String(b.id || ''));
       if (!entry) throw fail(404, 'Unknown history id');
-      return send(res, 200, store.feedback({ entryId: entry.id, verdict: b.verdict, level: entry.level }));
+      return send(res, 200, await store.feedback({ entryId: entry.id, verdict: b.verdict, level: entry.level }));
+    }
+    if (req.method === 'POST' && p === '/api/reports') {             // a user reports a number as a scam (MySQL only)
+      if (!store.report) throw fail(501, 'Reports need the MySQL database (see Backend/README.md)');
+      rateLimit(req);
+      const b = await readJson(req);
+      return send(res, 200, await store.report({ number: b.number, reason: b.reason, checkId: b.checkId }));
+    }
+    if (req.method === 'GET' && p === '/api/number-check') {         // Low / Medium / High for one number, from gold (MySQL only)
+      if (!store.numberRisk) throw fail(501, 'Number check needs the MySQL database (see Backend/README.md)');
+      return send(res, 200, await store.numberRisk(url.searchParams.get('number') || ''));
     }
     if (req.method === 'GET' && p === '/api/eval') {
       const f = path.join(ROOT, 'eval', 'results.json');
       if (!fs.existsSync(f)) throw fail(404, 'No evaluation has been run yet (node eval/run.js)');
       return send(res, 200, fs.readFileSync(f), TYPES['.json']);
     }
-    if (req.method === 'GET' && p === '/api/stats') return send(res, 200, store.stats());
+    if (req.method === 'GET' && p === '/api/stats') return send(res, 200, await store.stats());
 
     if (req.method === 'GET' || req.method === 'HEAD') {
       const f = p === '/' ? '/index.html' : p;
