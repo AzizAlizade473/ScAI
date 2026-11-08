@@ -35,6 +35,7 @@ class LiveCallSession {
    * @param {string} [o.baseUrl]
    * @param {string} o.detectorModel
    * @param {(s: LiveCallSession) => void} [o.onEnd]
+   * @param {((number: string) => Promise<any>) | null} [o.numberRisk]  database answer for the caller's number
    */
   constructor(o) {
     this.o = o;
@@ -123,14 +124,21 @@ class LiveCallSession {
     }
     if (this.ended) { agent.close(); return; }
     this.agent = agent;
-    this.detector = new ThreatDetector({ apiKey: this.o.apiKey, baseUrl: this.o.baseUrl, model: this.o.detectorModel, signals: { reports: persona.caller.reports, knownContact: false, smsCodeArrived: false } });
+    /* the caller's number in the scam database (gold layer) is a real signal for the detector */
+    let reports = persona.caller.reports, numberRisk = null;
+    if (this.o.numberRisk) {
+      try { numberRisk = await Promise.race([this.o.numberRisk(persona.caller.number), new Promise(ok => setTimeout(() => ok(null), 1500))]); } catch { numberRisk = null; }
+      if (numberRisk && numberRisk.known) reports = Math.max(reports, numberRisk.reports | 0);
+    }
+    this.detector = new ThreatDetector({ apiKey: this.o.apiKey, baseUrl: this.o.baseUrl, model: this.o.detectorModel, signals: { reports, knownContact: false, smsCodeArrived: false } });
     this._wireAgent(agent);
     this._wireDetector(this.detector);
     this.send({
       type: 'ready', session: this.id, mode: agent.mode, model: info.model, setupMs: info.ms,
       persona: { id: persona.id, title: persona.title, caller: persona.caller, voice: persona.voice },
       audio: { in: 'pcm16/16000', out: 'pcm16/24000' },
-      detector: { rules: 'rules.js', model: this.o.detectorModel, independent: true },
+      detector: { rules: 'rules.js', model: this.o.detectorModel, independent: true, reports },
+      numberRisk: numberRisk && numberRisk.known ? numberRisk : null,
       fallbackReason: fellBack || null, limits: { maxSec: MAX_SEC }, t: this.now()
     });
     if (fellBack) this.notice('fallback_turn', fellBack);

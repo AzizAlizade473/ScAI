@@ -152,6 +152,25 @@ Set `1440` to run daily.
   `{ number, known, risk: "High", govListed, category, reports, advice }` from `gold.mart_number_risk`.
 - New `POST /api/reports {number, reason?, checkId?}` lets a user report a number. Reports grow our own
   scam list next to the government one.
+- New `GET /api/insights?days=7` answers question 2 for the app from `gold.mart_daily_scam_summary`:
+  per-day checks and scams, the top tactics in scams, and the size of the number list. Only aggregates
+  leave the database.
+
+### Where the app shows the answers
+
+| Screen | What it shows | Data |
+|---|---|---|
+| Incoming call | "On the government list · High risk", or "Medium risk · 3 reports" | `/api/number-check` |
+| Call | The same number signal goes to the scam detector as "reports for this number" (also in the live AI call, looked up on the server) | `gold.mart_number_risk` |
+| Call ended → **Report** | Saves the number in `app.scam_report`. After the next pipeline run, 3+ reports make it Medium and 10+ make it High | `/api/reports` |
+| Lab → **Database** | Checks and scams per day, top tactics, risky numbers | `/api/insights` |
+
+Without MySQL (plain `node server.js`) these endpoints answer 501. The app then leaves the chips out,
+keeps a report on the phone only and says so, and the Lab card says the database is not connected.
+
+Tested end to end on 8 November 2026 on a real MySQL 8.4: the sample list made `012 404 77 31` High;
+three reports of `+994 12 555 01 47` plus one pipeline run made it Medium; three checks showed up in the
+Lab card as 3 checks, 2 scams, with their tactics.
 
 ## Government list: data contract
 
@@ -213,6 +232,24 @@ The producer promises this format, and the pipeline relies on it. If it changes,
 - **Kubernetes, snowflake schemas, Data Vault:** the slides call these unnecessary or overkill for a
   hackathon.
 - **SCD Type 2:** none of our questions needs history yet.
+
+## Without Docker (Windows)
+
+If Docker Desktop or WSL cannot be installed, `scripts/local-mysql.ps1` runs the same database on a portable
+MySQL 8.4 (the "ZIP Archive" from https://dev.mysql.com/downloads/mysql/, no installer and no admin rights):
+
+```powershell
+cd Backend
+copy .env.example .env        # fill in the three MySQL passwords; MYSQL_PORT=3307 if 3306 is taken
+npm ci
+copy pipeline\sample\gov_scam_numbers.sample.csv inboxpowershell -ExecutionPolicy Bypass -File scripts\local-mysql.ps1 -Pipeline -App
+```
+
+The first run creates the database in `Backend/local-mysql/` (git-ignored), applies `db/init/01..05` and creates
+the two users with the same grants as `06_users.sh`. `-Pipeline` runs the pipeline once, `-App` starts the app
+on the MySQL store, `-Stop` stops MySQL and `-Reset` deletes the local database. MySQL listens on 127.0.0.1 only.
+Two Windows traps the script avoids: `mysqld` does not start from a folder whose name begins with a dot, and
+under an Azerbaijani or Turkish Windows locale a case-insensitive `[A-Z]` regex does not match the letter `I`.
 
 ## Everyday commands
 

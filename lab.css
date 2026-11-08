@@ -164,3 +164,16 @@ pre.redacted{margin:0;white-space:pre-wrap;word-break:break-word;font:12.5px/1.4
 .lv-arch .n{position:absolute;left:-13px;top:7px;width:24px;height:24px;border-radius:50%;background:var(--d-accent,#0B57D0);color:#fff;font-size:13px;display:grid;place-items:center}
 .lv-arch small{display:block;color:var(--text-2);font-size:13.5px;line-height:1.4;margin-top:2px}
 .lv-arch code{display:inline-block;margin-top:4px;font-size:12px;padding:1px 7px;border-radius:6px;background:var(--surface-2);color:var(--text-2)}
+
+/* ---------- Database answers (gold layer) ---------- */
+.db-chip.lvl-caution{background:rgba(246,194,90,.16);color:#F6C25A}
+.db-chip.lvl-safe{background:rgba(127,207,154,.14);color:#7FCF9A}
+.db-h{font-size:13.5px;font-weight:700;color:var(--text-2);margin:12px 0 6px}
+.db-bars{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.db-bars li{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:8px;font-size:13.5px;color:var(--text-2)}
+.db-bars time{font-variant-numeric:tabular-nums}
+.db-bars b{font-variant-numeric:tabular-nums;color:var(--text);font-weight:600}
+.db-bars .bar{position:relative;height:10px;border-radius:5px;background:var(--surface-2);overflow:hidden}
+.db-bars .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--outline);border-radius:5px}
+.db-bars .bar i.s{background:#E46962}
+.db-chip.lvl-danger{background:rgba(242,139,130,.16);color:#F28B82}

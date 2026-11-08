@@ -128,12 +128,41 @@ function createStore() {
       const phone = toE164(number);
       if (!phone) { const e = new Error('Not a valid phone number'); e.status = 400; throw e; }
       const rows = await q(
-        `SELECT m.gov_listed, m.gov_category, m.gov_report_count + m.user_report_count AS reports, r.label, r.advice_en
+        `SELECT m.gov_listed, m.gov_category, m.gov_report_count + m.user_report_count AS reports, m.user_report_count, r.code, r.label, r.advice_en
            FROM gold.mart_number_risk m JOIN gold.dim_risk_level r ON r.risk_level_key = m.risk_level_key
           WHERE m.phone_e164 = ?`, [phone]);
       if (!rows[0]) return { number: phone, known: false };
       const m = rows[0];
-      return { number: phone, known: true, risk: m.label, govListed: !!m.gov_listed, category: m.gov_category, reports: m.reports, advice: m.advice_en };
+      return { number: phone, known: true, risk: m.label, level: m.code, govListed: !!m.gov_listed, category: m.gov_category, reports: m.reports, userReports: m.user_report_count, advice: m.advice_en };
+    },
+
+    /* New: question 2 for the app, read from the gold marts (the pipeline builds them).
+     * Only aggregates leave the database: per-day totals, the top tactics and the number-list size. */
+    async insights(days = 14) {
+      const daily = await q(
+        `SELECT d.full_date, ch.code AS channel, m.checks, m.scams, m.high_risk, m.avg_risk, m.feedback_correct, m.feedback_wrong
+           FROM gold.mart_daily_scam_summary m
+           JOIN gold.dim_date d ON d.date_key = m.date_key
+           JOIN gold.dim_channel ch ON ch.channel_key = m.channel_key
+          WHERE d.full_date >= (SELECT MAX(full_date) FROM gold.dim_date) - INTERVAL ? DAY
+          ORDER BY d.full_date, ch.channel_key`, [Math.max(1, Math.min(90, days | 0)) - 1]);
+      const tactics = await q(
+        `SELECT t.code, COUNT(*) AS n
+           FROM gold.bridge_check_tactic b
+           JOIN gold.fact_scam_check f ON f.check_key = b.check_key
+           JOIN gold.dim_tactic t ON t.tactic_key = b.tactic_key
+          WHERE f.is_scam
+          GROUP BY t.code ORDER BY n DESC, t.code LIMIT 5`);
+      const [nr] = await q(
+        `SELECT COUNT(*) AS numbers, COALESCE(SUM(gov_listed), 0) AS gov, COALESCE(SUM(risk_level_key = 3), 0) AS high
+           FROM gold.mart_number_risk`);
+      const [tot] = await q('SELECT COUNT(*) AS checks, COALESCE(SUM(is_scam), 0) AS scams FROM gold.fact_scam_check');
+      return {
+        daily: daily.map(r => ({ date: r.full_date instanceof Date ? r.full_date.toISOString().slice(0, 10) : String(r.full_date).slice(0, 10), channel: r.channel, checks: r.checks, scams: +r.scams, highRisk: +r.high_risk, avgRisk: r.avg_risk, correct: +r.feedback_correct, wrong: +r.feedback_wrong })),
+        tactics: tactics.map(r => ({ tactic: r.code, n: r.n })),
+        totals: { checks: tot.checks, scams: +tot.scams },
+        numbers: { total: nr.numbers, govListed: +nr.gov, high: +nr.high }
+      };
     },
 
     flushNow() { /* MySQL writes are already durable */ },

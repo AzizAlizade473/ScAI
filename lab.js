@@ -759,4 +759,112 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && state.rec) A.recClose();
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && e.target.id === 'chkText') A.chkRun();
 });
+
+/* ---------------- Database answers (Backend/: MySQL gold layer) ----------------
+ * Question 1, "is this caller's number a known scam number?": shown on the incoming and call screens and
+ * passed to the detector as the "reports in the scam database" signal. The "Report" button on the
+ * call-ended screen adds the number to app.scam_report; the pipeline turns reports into a risk level.
+ * Question 2, "how many scams did we catch, per day and with which tactics?": a card in the Lab.
+ * Without MySQL (plain `node server.js`) these endpoints answer 501 and the app simply leaves them out. */
+const DSTR = {
+  az: { 'db.gov': 'Hökumət siyahısında', 'db.reports': '{n} şikayət', 'db.risk.safe': 'Aşağı risk', 'db.risk.caution': 'Orta risk', 'db.risk.danger': 'Yüksək risk',
+    'db.reported': 'Nömrə fırıldaq bazasına göndərildi. Risk növbəti emaldan sonra yenilənir.', 'db.reportLocal': 'Verilənlər bazası qoşulmayıb: şikayət yalnız bu telefonda qeyd edildi.',
+    'db.title': 'Verilənlər bazası', 'db.b': 'MySQL «gold» qatından: hər gün neçə yoxlama və fırıldaq, hansı taktikalar. Rəqəmlər boru xətti (pipeline) son dəfə işləyəndə hesablanıb.',
+    'db.checks': 'Yoxlama', 'db.scams': 'Fırıldaq', 'db.numbers': 'Riskli nömrə', 'db.top': 'Ən çox taktikalar', 'db.days': 'Son günlər (fırıldaq / yoxlama)', 'db.empty': 'Hələ məlumat yoxdur: tətbiqdən istifadə edin, sonra pipeline-ı işə salın.',
+    'db.off': 'MySQL qoşulmayıb. Backend/README.md: docker compose up -d --build' },
+  ru: { 'db.gov': 'В государственном списке', 'db.reports': 'жалоб: {n}', 'db.risk.safe': 'Низкий риск', 'db.risk.caution': 'Средний риск', 'db.risk.danger': 'Высокий риск',
+    'db.reported': 'Номер отправлен в базу мошенников. Риск обновится после следующей обработки.', 'db.reportLocal': 'База данных не подключена: жалоба сохранена только на этом телефоне.',
+    'db.title': 'База данных', 'db.b': 'Из слоя «gold» MySQL: сколько проверок и мошенничеств в день и какие тактики. Цифры посчитаны при последнем запуске конвейера.',
+    'db.checks': 'Проверки', 'db.scams': 'Мошенничество', 'db.numbers': 'Опасные номера', 'db.top': 'Частые тактики', 'db.days': 'Последние дни (мошенн. / проверки)', 'db.empty': 'Данных пока нет: пользуйтесь приложением, затем запустите конвейер.',
+    'db.off': 'MySQL не подключён. Backend/README.md: docker compose up -d --build' },
+  en: { 'db.gov': 'On the government list', 'db.reports': '{n} reports', 'db.risk.safe': 'Low risk', 'db.risk.caution': 'Medium risk', 'db.risk.danger': 'High risk',
+    'db.reported': 'Number sent to the scam database. Its risk updates after the next pipeline run.', 'db.reportLocal': 'Database not connected: the report was kept on this phone only.',
+    'db.title': 'Database', 'db.b': 'From the MySQL gold layer: checks and scams per day, and which tactics. Computed at the last pipeline run.',
+    'db.checks': 'Checks', 'db.scams': 'Scams', 'db.numbers': 'Risky numbers', 'db.top': 'Top tactics', 'db.days': 'Recent days (scams / checks)', 'db.empty': 'No data yet: use the app, then run the pipeline.',
+    'db.off': 'MySQL not connected. Backend/README.md: docker compose up -d --build' }
+};
+for (const l of Object.keys(DSTR)) Object.assign(STR[l], DSTR[l]);
+
+state.db = { numbers: {}, off: false, insights: null, insightsErr: null, loading: false, at: 0 };
+const digits = n => String(n || '').replace(/\D/g, '');
+/* one lookup per number; the answer is applied to the current caller if it is still that number */
+async function lookupNumber(number) {
+  const k = digits(number), db = state.db;
+  if (!k || db.off || !HAS_SERVER() || k in db.numbers) return db.numbers[k] || null;
+  db.numbers[k] = null;
+  try {
+    const r = await api('/api/number-check?number=' + encodeURIComponent(k), { timeoutMs: 4000 });
+    db.numbers[k] = r;
+    const who = state.callee;
+    if (r && r.known && who && digits(who.number) === k) {
+      who.reports = Math.max(who.reports | 0, r.reports | 0);          /* the detector's "scam reports" signal */
+      who.dbRisk = r;
+      log(`Number check (gold.mart_number_risk): ${r.number} → ${r.risk}${r.govListed ? ' · government list' : ''} · ${r.reports} report(s)`);
+      if (state.screen === 'incoming') render();
+      else if (state.call && state.screen === 'call') { recompute(); render(); }
+    }
+    return r;
+  } catch (e) { if (e.status === 501) db.off = true; delete db.numbers[k]; return null; }
+}
+const riskChip = r => (r && r.known ? `<div class="rep-chip db-chip lvl-${esc(r.level || 'danger')}">${ic('alert')}<span>${r.govListed ? t('db.gov') + ' · ' : ''}${t('db.risk.' + (r.level || 'danger'))}${!r.govListed && r.reports ? ' · ' + t('db.reports', { n: r.reports }) : ''}</span></div>` : '');
+
+const _incoming = R.incoming;
+R.incoming = () => {
+  const w = callee();
+  setTimeout(() => lookupNumber(w.number), 0);
+  const r = w.dbRisk || state.db.numbers[digits(w.number)];
+  if (r && r.known && !w.dbRisk) { w.dbRisk = r; w.reports = Math.max(w.reports | 0, r.reports | 0); }
+  const h = _incoming();
+  if (!r || !r.known) return h;
+  /* the database answer replaces the plain "N people reported" chip */
+  return h.replace(/<div class="rep-chip">[\s\S]*?<\/div>/, '').replace(/(<p class="mob">[\s\S]*?<\/p>)/, '$1' + riskChip(r));
+};
+
+/* "Report" on the call-ended screen: a real report to app.scam_report when MySQL is on */
+A.report = async function () {
+  const e = state.ended; if (!e || e.reported) return;
+  e.reported = true; render();
+  const who = callee(), r = state.lastCallAI;
+  try {
+    await api('/api/reports', { method: 'POST', json: { number: who.number, reason: r && /^[a-z_]{2,30}$/.test(r.scamType || '') ? r.scamType : 'other' }, timeoutMs: 6000 });
+    delete state.db.numbers[digits(who.number)];
+    snack(t('db.reported')); log(`Reported ${who.number} → app.scam_report`);
+  } catch (err) {
+    if (err.status === 501) state.db.off = true;
+    snack(t('db.reportLocal')); log('Report kept on this phone only: ' + err.message);
+  }
+};
+const _onCallEnd = window.onCallEnd;
+window.onCallEnd = function (c, who) { state.lastCallAI = c && c.ai && c.ai.result; return _onCallEnd && _onCallEnd(c, who); };
+
+/* Lab card: question 2 from gold.mart_daily_scam_summary */
+async function loadInsights() {
+  const db = state.db;
+  if ((db.insights && Date.now() - db.at < 30000) || db.insightsErr || db.loading || db.off || !HAS_SERVER()) return;
+  db.loading = true; db.at = Date.now();
+  try { db.insights = await api('/api/insights?days=7', { timeoutMs: 6000 }); }
+  catch (e) { db.insightsErr = e.status === 501 ? 'off' : e.message; if (e.status === 501) db.off = true; }
+  db.loading = false;
+  const box = $('#dbBox'); if (box) box.innerHTML = insightsHTML();
+}
+function insightsHTML() {
+  const db = state.db, d = db.insights;
+  if (db.off || db.insightsErr === 'off') return `<p class="muted" style="font-size:15px">${t('db.off')}</p>`;
+  if (db.insightsErr) return `<p class="muted" style="font-size:15px">${esc(db.insightsErr)}</p>`;
+  if (!d) return `<div class="sk" style="height:110px;border-radius:16px"></div>`;
+  if (!d.totals.checks && !d.numbers.total) return `<p class="muted" style="font-size:15px">${t('db.empty')}</p>`;
+  const byDay = {};
+  for (const r of d.daily) { const x = byDay[r.date] || (byDay[r.date] = { checks: 0, scams: 0 }); x.checks += r.checks; x.scams += r.scams; }
+  const days = Object.entries(byDay), max = Math.max(1, ...days.map(([, x]) => x.checks));
+  return `<p style="font-size:14.5px;color:var(--text-2);line-height:1.4;margin-top:4px">${t('db.b')}</p>
+    <div class="kpis"><div class="kpi"><b>${d.totals.checks}</b><span>${t('db.checks')}</span></div><div class="kpi"><b>${d.totals.scams}</b><span>${t('db.scams')}</span></div><div class="kpi"><b>${d.numbers.high}</b><span>${t('db.numbers')}</span></div></div>
+    ${days.length ? `<p class="db-h">${t('db.days')}</p><ul class="db-bars">${days.map(([day, x]) => `<li><time>${esc(day.slice(5))}</time><span class="bar"><i style="width:${Math.round(100 * x.checks / max)}%"></i><i class="s" style="width:${Math.round(100 * x.scams / max)}%"></i></span><b>${x.scams} / ${x.checks}</b></li>`).join('')}</ul>` : ''}
+    ${d.tactics.length ? `<p class="db-h">${t('db.top')}</p><div class="evs">${d.tactics.map(x => `<span class="evc ${tacticClass(x.tactic) === 'danger' ? 'danger' : ''}">${esc(tacticLabel(x.tactic))} · ${x.n}</span>`).join('')}</div>` : ''}`;
+}
+const _lab = R.lab;
+R.lab = () => {
+  setTimeout(loadInsights, 0);
+  const h = _lab();
+  return h.replace(/<\/div>\s*$/, `<h2 class="lb-sec">${t('db.title')}<span>${ic('chart')}</span></h2><div class="lb-card" id="dbBox">${insightsHTML()}</div></div>`);
+};
 })();

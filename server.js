@@ -177,7 +177,7 @@ const server = http.createServer(async (req, res) => {
       let history = null;
       try { history = (await store.stats()).total; } catch (e) { console.error('[store]', e.message); }
       return send(res, 200, {
-        gemini: Boolean(KEY), model: MODEL, fallbacks: ScamCheck.FALLBACK_MODELS, stt: STT_MODEL, tts: TTS_MODEL, store: history !== null, history, cooling: ScamCheck.status(),
+        gemini: Boolean(KEY), model: MODEL, fallbacks: ScamCheck.FALLBACK_MODELS, stt: STT_MODEL, tts: TTS_MODEL, store: history !== null, db: store.kind === 'mysql' ? 'mysql' : 'json', history, cooling: ScamCheck.status(),
         live: { available: Boolean(KEY), path: '/api/live', models: LIVE_MODELS, fallback: 'stt → llm → tts', detector: MODEL, personas: Personas.publicList(), active: LiveCallSession.activeCount(), max: MAX_SESSIONS, cooling: liveStatus() }
       });
     }
@@ -260,6 +260,10 @@ const server = http.createServer(async (req, res) => {
       if (!store.numberRisk) throw fail(501, 'Number check needs the MySQL database (see Backend/README.md)');
       return send(res, 200, await store.numberRisk(url.searchParams.get('number') || ''));
     }
+    if (req.method === 'GET' && p === '/api/insights') {             // question 2 from the gold marts (MySQL only)
+      if (!store.insights) throw fail(501, 'Insights need the MySQL database (see Backend/README.md)');
+      return send(res, 200, await store.insights(+url.searchParams.get('days') || 14));
+    }
     if (req.method === 'GET' && p === '/api/eval') {
       const f = path.join(ROOT, 'eval', 'results.json');
       if (!fs.existsSync(f)) throw fail(404, 'No evaluation has been run yet (node eval/run.js)');
@@ -301,6 +305,7 @@ server.on('upgrade', (req, socket) => {
   liveByIp.set(ip, (liveByIp.get(ip) || 0) + 1);
   const s = new LiveCallSession({
     conn, apiKey: KEY, baseUrl: BASE, detectorModel: MODEL,
+    numberRisk: store.numberRisk ? n => store.numberRisk(n) : null,      /* gold.mart_number_risk, when MySQL is on */
     onEnd: x => {
       liveByIp.set(ip, Math.max(0, (liveByIp.get(ip) || 1) - 1));
       const sum = x.summary();

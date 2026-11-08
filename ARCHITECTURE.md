@@ -210,6 +210,7 @@ links. The personas are fictional. Max 7 minutes per call, 3 calls per server, 2
 | GET / POST / DELETE | `/api/history`, `/api/history/:id` | Redacted analyses and call alert metadata |
 | POST | `/api/feedback` | `{id, verdict: correct|wrong}` |
 | GET | `/api/eval`, `/api/stats` | Evaluation results, history and feedback counts |
+| GET | `/api/number-check`, `/api/insights`; POST `/api/reports` | Number risk, daily scam summary and number reports from the MySQL database (`Backend/`); 501 without it |
 | WebSocket | `/api/live` | Live AI call: PCM16 audio both ways + JSON events (section 2a); `/api/health` lists models and personas |
 
 ## 5. Security, privacy and reliability

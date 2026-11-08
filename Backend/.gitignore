@@ -4,3 +4,5 @@ node_modules/
 # Files dropped in the inbox are data, not code.
 inbox/*
 !inbox/README.md
+# Local MySQL without Docker (scripts/local-mysql.ps1)
+local-mysql/
