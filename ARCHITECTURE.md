@@ -51,8 +51,8 @@ No npm dependencies: Node 18+ built-ins and browser APIs only.
    score wins. Without the AI, the rules decide alone.
 5. **Calls.** After each sentence the rules run instantly and the last minute of transcript goes to Gemini
    (debounced; stale answers dropped). Caller signals are also used: the scam-report count, whether the caller
-   is a saved contact, and whether an SMS code arrived during the call. The risk escalates to a full-screen
-   alert with tone, vibration, a spoken Azerbaijani warning (pre-generated TTS) and a simulated SMS to the
+   is a saved contact, and whether an SMS code arrived during the call. The risk escalates to an in-call
+   warning (a heads-up card on the call screen; the call is not interrupted) with tone, vibration, a spoken Azerbaijani warning (pre-generated TTS) and a simulated SMS to the
    trusted person.
 
 ## 3. Simulation Lab and speech

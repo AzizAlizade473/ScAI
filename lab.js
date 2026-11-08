@@ -375,40 +375,64 @@ function startLab(sc, script) {
   log(`Simulation Lab: incoming "${sc.id}" (simulated call, pre-generated audio)`);
   if (state.lab.demo) setTimeout(() => { if (state.screen === 'incoming' && state.labScript) A.answer(); }, 2200);
 }
-/* hook used by index.html's nextLine() for lines that carry audio */
+/* hook used by index.html's nextLine() for lines that carry audio.
+ * The audio always plays, so the conversation goes on even with scam check off; speech-to-text,
+ * the transcript and the analysis run only while scam check is on. The clip is fetched once and
+ * played from a blob URL — the same bytes go to speech-to-text — which also makes repeated runs
+ * independent of the browser's media cache. */
 window.labLine = function (c, k) {
-  const src = c.script.lines[k];
-  const l = { who: src.who, text: '', stt: 'wait', ref: src.ref, en: src.en };
-  c.lines.push(l); const i = c.lines.length - 1; c.typing = i;
+  const src = c.script.lines[k], analyse = c.phase === 'listening';
+  const l = { who: src.who, text: '', stt: analyse ? 'wait' : 'off', ref: src.ref, en: src.en };
+  c.lines.push(l); const i = c.lines.length - 1; c.playing = true;
   if (k === c.script.sms && !c.smsArrived) { c.smsArrived = true; log('Signal: SMS code arrived during the call'); vibrate(60); }
-  const lis = $('#listening'); if (lis) lis.insertAdjacentHTML('beforebegin', lineHTML(l, i, false));
-  const tl = $('#trList'); if (tl) tl.scrollTop = tl.scrollHeight;
-  setPipe([2, 3, 4], ['stt']); flash(4);
-  let audioDone = false, textDone = false;
+  if (analyse) {
+    c.typing = i;
+    const lis = $('#listening'); if (lis) lis.insertAdjacentHTML('beforebegin', lineHTML(l, i, false));
+    const tl = $('#trList'); if (tl) tl.scrollTop = tl.scrollHeight;
+    setPipe([2, 3, 4], ['stt']); flash(4);
+  }
+  let audioDone = false, textDone = !analyse;
   const next = () => {
-    if (!(audioDone && textDone && state.call === c && c.phase === 'listening')) return;
-    if (c.scriptIdx < c.script.lines.length) { later(nextLine, 450); return; }
+    if (!(audioDone && textDone) || state.call !== c || !c.playing) return;
+    c.playing = false;
+    if (c.scriptIdx < c.script.lines.length) { labLater(c, nextLine, 450); return; }
     /* 90-second demo: when a call finishes without an alert, hang up and ring the next scenario */
-    if (state.lab.demo && c.level !== 'danger') later(() => {
+    if (state.lab.demo && c.level !== 'danger') labLater(c, () => {
       hangUp();
       const nx = (state.lab.queue || []).shift();
       if (nx) setTimeout(() => { if (state.screen === 'ended') startLab(Scenarios.byId(nx)); }, 2500); else state.lab.demo = false;
     }, 1500);
   };
-  const a = new Audio(src.audio); labAudio = a;
-  a.onended = () => { audioDone = true; if (labAudio === a) labAudio = null; next(); };
-  a.onerror = () => { audioDone = true; next(); };
-  if (!c.mute) a.play().catch(() => { audioDone = true; next(); });
+  const finishText = () => {
+    if (state.call !== c) return;
+    if (c.phase !== 'listening' || l.stt === 'off') {           /* scam check was switched off meanwhile */
+      if (c.typing === i) c.typing = -1;
+      if (l.stt === 'wait') l.stt = 'off';
+      textDone = true; next(); return;
+    }
+    (c.timeline = c.timeline || []).push({ t: c.sec, kind: 'stt', text: l.text, meta: l.stt === 'ok' ? `${l.sttModel} · ${ms(l.sttMs)}${l.sttCached ? ' · ' + t('stt.cached') : ''}` : t('stt.fallback') });
+    if (l.stt === 'ok') c.sttCount = (c.sttCount || 0) + 1, c.sttMsSum = (c.sttMsSum || 0) + l.sttMs;
+    typeLine(c, i, () => { if (c.phase === 'listening') lineDone(i); else if (c.typing === i) c.typing = -1; textDone = true; next(); });
+  };
   const t0 = performance.now();
-  fetch(src.audio).then(r => r.blob()).then(b => api('/api/transcribe' + (state.judge ? '?fresh=1' : ''), { method: 'POST', body: b, headers: { 'Content-Type': 'audio/wav' } }))
-    .then(out => { if (!out.text) throw new Error('empty'); Object.assign(l, { text: out.text, stt: 'ok', sttModel: out.model, sttMs: out.ms || Math.round(performance.now() - t0), sttCached: !!out.cached }); })
-    .catch(err => { Object.assign(l, { text: src.ref, stt: 'fallback', sttErr: err.message }); log('STT unavailable: ' + err.message); })
-    .finally(() => {
-      if (state.call !== c) return;
-      (c.timeline = c.timeline || []).push({ t: c.sec, kind: 'stt', text: l.text, meta: l.stt === 'ok' ? `${l.sttModel} · ${ms(l.sttMs)}${l.sttCached ? ' · ' + t('stt.cached') : ''}` : t('stt.fallback') });
-      if (l.stt === 'ok') c.sttCount = (c.sttCount || 0) + 1, c.sttMsSum = (c.sttMsSum || 0) + l.sttMs;
-      typeLine(c, i, () => { lineDone(i); textDone = true; next(); });
-    });
+  fetch(src.audio).then(r => { if (!r.ok) throw new Error('audio ' + r.status); return r.blob(); }).then(blob => {
+    if (state.call !== c) return;
+    const url = URL.createObjectURL(blob), a = new Audio(url);
+    labAudio = a;                                                /* Mute is the user's microphone; the caller stays audible */
+    const done = () => { if (audioDone) return; audioDone = true; URL.revokeObjectURL(url); if (labAudio === a) labAudio = null; next(); };
+    a.onended = done; a.onerror = done;
+    a.play().catch(done);
+    if (!analyse) return;
+    api('/api/transcribe' + (state.judge ? '?fresh=1' : ''), { method: 'POST', body: blob, headers: { 'Content-Type': 'audio/wav' } })
+      .then(out => { if (!out.text) throw new Error('empty'); Object.assign(l, { text: out.text, stt: 'ok', sttModel: out.model, sttMs: out.ms || Math.round(performance.now() - t0), sttCached: !!out.cached }); })
+      .catch(err => { Object.assign(l, { text: src.ref, stt: 'fallback', sttErr: err.message }); log('STT unavailable: ' + err.message); })
+      .finally(finishText);
+  }).catch(err => {                                                 /* clip missing: show the script text, labelled */
+    log('Lab audio unavailable: ' + err.message);
+    Object.assign(l, { text: src.ref, stt: analyse ? 'fallback' : 'off' });
+    setTimeout(() => { audioDone = true; next(); }, 1200 + src.ref.split(' ').length * 260);
+    if (analyse) finishText();
+  });
 };
 function typeLine(c, i, done) {
   const l = c.lines[i], li = $(`#trList .line[data-i="${i}"]`);

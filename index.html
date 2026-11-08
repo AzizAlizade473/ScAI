@@ -704,6 +704,17 @@ textarea.p-input{resize:vertical;min-height:64px;line-height:1.4}
 .hangx{width:76px;height:76px;border-radius:50%;border:0;background:#E5322D;color:#fff;display:grid;place-items:center;transition:transform .12s}
 .hangx:active{transform:scale(.95)}
 .hangx .ic{width:36px;height:36px;fill:currentColor;stroke:none}
+/* in-call scam warning (heads-up, does not interrupt the call) */
+.cx-alert{position:absolute;top:30px;left:10px;right:10px;z-index:6;border-radius:20px;padding:10px 12px 10px 14px;background:#2A1513;box-shadow:inset 0 0 0 1.5px #FF5A4F,0 14px 32px rgba(0,0,0,.55);color:#F3F4F6;animation:drop .35s ease}
+.cx-alert-h{display:flex;align-items:center;gap:8px}
+.cx-alert-h .ic{width:22px;height:22px;color:#FF8A80;flex:none}
+.cx-alert-h b{font-size:16px;font-weight:800;color:#FF8A80;flex:1;line-height:1.2}
+.cx-alert-x{width:34px;height:34px;flex:none;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:#E9EAEC;display:grid;place-items:center}
+.cx-alert-x .ic{width:18px;height:18px;color:#E9EAEC}
+.cx-alert p{font-size:14.5px;line-height:1.35;color:#F1D9D6;margin:6px 0 8px}
+.cx-alert-c{display:flex;flex-wrap:wrap;gap:6px}
+.cx-alert-c span{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid rgba(255,138,128,.5);color:#FFD2CE}
+.cx-alert-c .ic{width:14px;height:14px}
 /* call ended: same dark system-call look */
 .app[data-screen="ended"]{background:#0D0E11}
 .app[data-screen="ended"] .statusbar,.app[data-screen="ended"] .gesture{color:#fff}
@@ -1145,7 +1156,7 @@ const SEED_CALLS=[
 ];
 const state={
  lang:'az', theme:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'),
- screen:'onboarding', perms:{mic:false,acc:false,beep:false}, onbStep:0, onbBusy:null,
+ screen:'home', perms:{mic:true,acc:true,beep:true}, onbStep:0, onbBusy:null,
  family:{name:'Leyla',phone:'501234567',rel:'child',notify:true},
  alerts:SEED_ALERTS.slice(), filter:'all', view:'list', open:{}, historyLoading:false, historySeen:false,
  search:{open:false,q:''}, pop:false,
@@ -1217,8 +1228,8 @@ function log(msg){const l=$('#log');if(l.firstElementChild&&l.firstElementChild.
 
 /* ================= Prototype panel ================= */
 const JUMPS=[
- ['onboarding','7','Permissions onboarding'],['home','1','Home (call log)'],['keypad','1','Keypad'],['incoming','2','Incoming call'],['starting','…','Starting protection (loading)'],
- ['call','2','Active call — safe'],['caution','3','Amber caution'],['danger','4','Red alert (full screen)'],['ended','8','Call ended'],
+ ['home','1','Home (call log)'],['keypad','1','Keypad'],['incoming','2','Incoming call'],['starting','…','Starting protection (loading)'],
+ ['call','2','Active call — safe'],['caution','3','Amber caution'],['danger','4','Scam warning (in call)'],['ended','8','Call ended'],
  ['family','5','Family contact setup'],['history','6','Alert history'],
 ];
 $('#pScreens').innerHTML=JUMPS.map(([k,n,l])=>`<button class="p-btn" data-jump="${k}"><span class="n">${n}</span>${l}</button>`).join('');
@@ -1379,7 +1390,7 @@ R.home=()=>{
       <input id="dlSearch" type="search" placeholder="${t('dl.search')}" aria-label="${t('dl.search')}" value="${esc(state.dlq)}" autocomplete="off">
       <button class="icb" data-action="voiceSearch" aria-label="${t('dl.voice')}">${ic('mic')}</button></div>
     <div class="chips" role="group" aria-label="Filter">${['all','missed','contacts','nonspam','spam'].map(k=>`<button class="fchip" data-action="chip" data-k="${k}" aria-pressed="${state.chip===k}">${t('chip.'+k)}</button>`).join('')}</div>
-    <div class="dl-prot">${ic(ok?'shieldCheck':'info')}<span class="txt"><strong>${ok?t('home.ready.t'):t('home.needs.t')}</strong><small>${ok?t('home.protectHint'):t('home.needs.b')}</small></span>
+    <div class="dl-prot">${ic('shieldCheck')}<span class="txt"><strong>${t('home.ready.t')}</strong><small>${t('home.protectHint')}</small></span>
       <button class="pbtn" data-action="${ok?'protect':'fixPerms'}">${ok?t('dl.protect'):t('home.needs.cta')}</button></div>
     <div class="fav-head"><button class="sec-link" data-action="toggleFav" aria-expanded="${state.favOpen}">${t('dl.favorites')}${ic('chevUp')}</button>
       <button class="pill-btn" data-go="family">${t('dl.viewContacts')}</button></div>
@@ -1553,6 +1564,7 @@ R.call=()=>{
       <h1 class="cx-nm" tabindex="-1" data-focus>${esc(who.name||who.number)}</h1>
       <div class="cx-sub">${who.name?esc(who.number):t('incoming.unknown')}${who.reports?`<span class="rep">${ic('alert')}${t('call.reports',{n:who.reports})}</span>`:''}</div>
       <div class="cx-time" id="timer">${fmtTime(c.sec)}</div></div>
+    <div id="cxAlert">${alertHTML()}</div>
     <div id="recBox">${recHTML()}</div>
     <div class="cx-mid" id="callBody">${callBodyHTML()}</div>
     <div class="cx-grid">
@@ -1688,6 +1700,7 @@ function renderSheet(){
 
 /* ================= Call engine ================= */
 function newCall(script){return{script:script||pickScript(callee()),recAt:0,hold:false,sec:0,lines:[],scriptIdx:0,typing:-1,interim:'',risk:.05,level:'safe',topTag:null,phase:'off',startStep:0,speaker:true,mute:false,familyAlerted:false,smsArrived:false,dangerShown:false,ai:{status:'idle',req:0,applied:0,result:null,ms:0,err:''},timeouts:[],tick:null,aiT:null}}
+function labLater(c,fn,ms){setTimeout(()=>{if(state.call===c)fn()},ms)}
 function later(fn,ms){const c=state.call;if(!c)return;c.timeouts.push(setTimeout(()=>{if(state.call===c)fn()},ms))}
 function stopCall(){window.labStop&&labStop();const c=state.call;if(!c)return;clearInterval(c.tick);clearTimeout(c.aiT);c.timeouts.forEach(clearTimeout);state.call=null;try{speechSynthesis.cancel()}catch(e){}stopMic()}
 function startTick(){const c=state.call;c.tick=setInterval(()=>{c.sec++;const el=$('#timer');if(el)el.textContent=fmtTime(c.sec);const r=$('#recT');if(r)r.textContent=fmtTime(Math.max(0,c.sec-c.recAt))},1000)}
@@ -1706,14 +1719,17 @@ function refreshLive(){
 function openCall(who){
   stopCall();state.callee=who||state.callee||null;state.call=newCall(state.labScript||undefined);state.labScript=null;startTick();go('call');setPipe([]);
   log(`Call connected${state.callee?' — '+(state.callee.name||state.callee.number):''} · scenario: ${state.call.script.id}`);
-  /* Scam check is allowed in Settings (onboarding), so it starts by itself on every call */
-  if(permsOK()&&state.autoScan!==false)startProtection();else if(!permsOK())snack(t('home.needs.b'));
+  /* Scam check is allowed in Settings, so it starts by itself on every call */
+  if(state.autoScan!==false)startProtection();
+  else if(state.call.script.lab)labLater(state.call,nextLine,1200);   /* the conversation runs even with scam check off */
 }
 function stopProtection(){
   const c=state.call;if(!c)return;
   c.timeouts.forEach(clearTimeout);c.timeouts=[];clearTimeout(c.aiT);
-  if(c.typing>=0){c.lines.splice(c.typing,1);c.typing=-1;c.scriptIdx=Math.max(0,c.scriptIdx-1)}
-  c.phase='off';stopMic();render(true);setPipe([]);log('User turned scam check off');
+  if(c.typing>=0&&!c.script.lab){c.lines.splice(c.typing,1);c.typing=-1;c.scriptIdx=Math.max(0,c.scriptIdx-1)}
+  if(c.script.lab)c.typing=-1;   /* the voiced line keeps playing; it is just not analysed */
+  c.phase='off';c.alertOpen=false;stopMic();render(true);setPipe([]);log('User turned scam check off');
+  if(c.script.lab&&!c.playing&&c.scriptIdx<c.script.lines.length)labLater(c,nextLine,800);   /* keep the conversation going */
 }
 function startProtection(hold){
   if(!state.call){state.call=newCall();startTick()}
@@ -1732,9 +1748,11 @@ function beginListening(){
 }
 /* Scripted demo line with a word-by-word "streaming STT" effect */
 function nextLine(){
-  const c=state.call;if(!c||c.phase!=='listening'||c.scriptIdx>=c.script.lines.length||c.typing>=0)return;
+  const c=state.call;if(!c||c.scriptIdx>=c.script.lines.length||c.typing>=0||c.playing)return;
+  /* voiced Lab line: the audio always plays; speech-to-text and analysis run only while scam check is on */
+  if(c.script.lines[c.scriptIdx].audio&&window.labLine){labLine(c,c.scriptIdx++);return}
+  if(c.phase!=='listening')return;
   const k=c.scriptIdx++;
-  if(c.script.lines[k].audio&&window.labLine){labLine(c,k);return}   /* voiced Lab line: real speech-to-text */
   if(k===c.script.sms&&!c.smsArrived){c.smsArrived=true;log('Signal: SMS code arrived during the call')}
   const l={...c.script.lines[k]};c.lines.push(l);const i=c.lines.length-1;c.typing=i;
   const words=lineText(l).split(' ');
@@ -1772,7 +1790,7 @@ function lineDone(i){
   setPipe([5,6],['db']);flash(6);
   window.onLineAnalyzed&&onLineAnalyzed(c,i);
   recompute();scheduleAI();
-  if(!c.script.lab&&state.auto&&c.level!=='danger'&&c.scriptIdx<c.script.lines.length)later(nextLine,1900);
+  if(!c.script.lab&&state.auto&&c.scriptIdx<c.script.lines.length)later(nextLine,1900);
 }
 /* Fusion: the AI can raise a warning or explain it, but never hide one the rules raised. */
 function recompute(silent){
@@ -1823,8 +1841,20 @@ function triggerDanger(){
   const f=state.family;if(f&&f.notify)c.familyAlerted=true;
   alarm();vibrate([400,150,400,150,400]);setTimeout(speak,900);
   setPipe([6,7],c.familyAlerted?['push']:[]);flash(7);
-  log('Warn: beep + vibration + voice + full screen');if(c.familyAlerted)log(`Family push sent to ${f.name}`);
-  go('danger');
+  log('Warn: beep + vibration + voice + in-call warning');if(c.familyAlerted)log(`Family push sent to ${f.name}`);
+  c.alertOpen=true;
+  const box=$('#cxAlert');
+  if(state.screen==='call'&&box){box.innerHTML=alertHTML();refreshLive()}else go('call');
+}
+/* Heads-up warning on the call screen: the call continues, nothing is interrupted */
+function alertHTML(){
+  const c=state.call,f=state.family;
+  if(!c||!c.alertOpen)return '';
+  return `<section class="cx-alert" role="alert">
+    <div class="cx-alert-h">${ic('octagon')}<b>${t('danger.title')}</b><button class="cx-alert-x" data-action="alertClose" aria-label="${t('common.clear')}">${ic('x')}</button></div>
+    <p>${t('danger.sub')} ${reasonText()}</p>
+    <div class="cx-alert-c"><span>${ic('speaker')}${t('danger.voice')}</span><span>${ic('vibrate')}${t('danger.vibe')}</span>${f&&c.familyAlerted?`<span>${ic('check')}${t('danger.familyNotified',{name:esc(f.name)})}</span>`:''}</div>
+  </section>`;
 }
 const AI_TYPE={fake_bank:'bankSms',fake_prize:'prize',fake_relative:'relative',fake_courier:'courier',fake_government:'gov',investment:'invest',remote_access:'remote',other:'other',none:'other'};
 function hangUp(){
@@ -1923,6 +1953,7 @@ const A={
   speaker(el){state.call.speaker=!state.call.speaker;el.setAttribute('aria-pressed',state.call.speaker)},
   mute(el){state.call.mute=!state.call.mute;el.setAttribute('aria-pressed',state.call.mute);el.innerHTML=ic(state.call.mute?'micOff':'mic')+`<span>${t('call.mute')}</span>`},
   hangup(){hangUp()},
+  alertClose(){const c=state.call;if(c)c.alertOpen=false;const b=$('#cxAlert');if(b)b.innerHTML=''},
   backToCall(){go('call');const c=state.call;if(c&&c.script.lab&&c.typing<0&&c.scriptIdx<c.script.lines.length)later(nextLine,600)},
   callFamily(){if(!state.family){snack(t('danger.noFamily'));return}const n=state.family.name;hangUp();snack(t('snack.callingFamily',{name:n}))},
   callBank(){hangUp();snack(t('snack.callingBank'))},
@@ -1952,12 +1983,11 @@ function jumpTo(k){
   stopCall();state.sheet=false;state.pop=false;state.callee=null;
   if(k!=='onboarding')state.perms={mic:true,acc:true,beep:true};
   switch(k){
-    case 'onboarding':state.perms={mic:false,acc:false,beep:false};state.onbStep=0;setPipe([]);go(k);break;
     case 'incoming':A.incoming();break;
     case 'starting':state.call=newCall();startTick();startProtection(true);break;
     case 'call':instantCall(2);go('call');scheduleAI();break;
     case 'caution':instantCall(4);go('call');scheduleAI();break;
-    case 'danger':instantCall(5);triggerDanger();scheduleAI();break;
+    case 'danger':instantCall(5);go('call');triggerDanger();scheduleAI();break;
     case 'ended':state.callee={name:'',number:NUMBER,reports:REPORTS};state.ended={saved:true,reported:false,sec:94,level:'danger',scanned:true,why:t('reason.bankSms')};setPipe([8]);go('ended');break;
     case 'history':state.historySeen=true;go(k);break;
     default:setPipe([]);go(k);
