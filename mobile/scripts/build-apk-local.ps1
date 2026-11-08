@@ -26,40 +26,47 @@ if (-not $env:EXPO_PUBLIC_API_URL) { $env:EXPO_PUBLIC_API_URL = 'http://192.168.
 $env:NODE_ENV = 'production'
 if (-not $env:SG_CXX_DIR) { $env:SG_CXX_DIR = 'C:\sgx' }   # short CMake staging folder (plugins/withShortCxxDir.js)
 
-$repo = (Resolve-Path "$PSScriptRoot\..\..").Path
+$repo = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $build = if ($env:SG_BUILD_DIR) { $env:SG_BUILD_DIR } else { 'C:\m' }
+$web = Join-Path $build 'web'
 Write-Host "== Scam Guardian APK build" -ForegroundColor Cyan
 Write-Host "   source: $repo   build folder: $build"
 Write-Host "   JDK: $env:JAVA_HOME   SDK: $env:ANDROID_HOME"
 Write-Host "   default AI server in the app: $env:EXPO_PUBLIC_API_URL"
 
 if (-not $Resume) {
-Write-Host "`n== [1/5] Mirroring the source into $build" -ForegroundColor Cyan
-# the mobile app becomes the root of the build folder; the web UI goes to <build>\web (plugins/withWebAssets.js)
-robocopy "$repo\mobile" $build /MIR /NFL /NDL /NJH /NJS /NP /XD node_modules android .cxx .expo dist web /XF .env *.apk | Out-Null
-if ($LASTEXITCODE -ge 8) { throw "robocopy failed ($LASTEXITCODE)" }
-New-Item -ItemType Directory -Force "$build\web" | Out-Null
-foreach ($f in 'index.html','lab.css','lab.js','rules.js','scenarios.js','scam-check.js') { Copy-Item "$repo\$f" "$build\web\$f" -Force }
-robocopy "$repoudio" "$build\webudio" /MIR /NFL /NDL /NJH /NJS /NP | Out-Null
-if ($LASTEXITCODE -ge 8) { throw "robocopy audio failed ($LASTEXITCODE)" }
+  Write-Host "`n== [1/5] Mirroring the source into $build" -ForegroundColor Cyan
+  # the mobile app becomes the root of the build folder; the web UI goes to <build>\web (plugins/withWebAssets.js)
+  robocopy (Join-Path $repo 'mobile') $build /MIR /NFL /NDL /NJH /NJS /NP /XD node_modules android .cxx .expo dist web /XF .env *.apk | Out-Null
+  if ($LASTEXITCODE -ge 8) { throw "robocopy failed ($LASTEXITCODE)" }
+  New-Item -ItemType Directory -Force $web | Out-Null
+  foreach ($f in 'index.html', 'lab.css', 'lab.js', 'rules.js', 'scenarios.js', 'scam-check.js') {
+    Copy-Item (Join-Path $repo $f) (Join-Path $web $f) -Force
+  }
+  robocopy (Join-Path $repo 'audio') (Join-Path $web 'audio') /MIR /NFL /NDL /NJH /NJS /NP | Out-Null
+  if ($LASTEXITCODE -ge 8) { throw "robocopy (voice clips) failed ($LASTEXITCODE)" }
 
-Write-Host "`n== [2/5] Installing packages" -ForegroundColor Cyan
-Set-Location "$build"
-npm install --no-audit --no-fund
-if ($LASTEXITCODE -ne 0) { throw 'npm install failed' }
+  Write-Host "`n== [2/5] Installing packages" -ForegroundColor Cyan
+  Set-Location $build
+  npm install --no-audit --no-fund
+  if ($LASTEXITCODE -ne 0) { throw 'npm install failed' }
 
-Write-Host "`n== [3/5] Generating the Android project and bundling the web UI into the APK assets" -ForegroundColor Cyan
-npx expo prebuild --platform android --clean --no-install
-if ($LASTEXITCODE -ne 0) { throw 'expo prebuild failed' }
-} else { Write-Host "`n== Resuming the previous build in $build" -ForegroundColor Cyan }
+  Write-Host "`n== [3/5] Generating the Android project and bundling the web UI into the APK assets" -ForegroundColor Cyan
+  npx expo prebuild --platform android --clean --no-install
+  if ($LASTEXITCODE -ne 0) { throw 'expo prebuild failed' }
+} else {
+  Write-Host "`n== Resuming the previous build in $build" -ForegroundColor Cyan
+}
 
 Write-Host "`n== [4/5] Gradle release build (first run: 15-30 min)" -ForegroundColor Cyan
-Set-Location "$build\android"
+Set-Location (Join-Path $build 'android')
 .\gradlew.bat assembleRelease --console=plain "-PreactNativeArchitectures=arm64-v8a,x86_64"
 if ($LASTEXITCODE -ne 0) { Set-Location $repo; throw 'Gradle build failed' }
 
 Write-Host "`n== [5/5] Copying the APK" -ForegroundColor Cyan
-Copy-Item "$build\android\app\build\outputs\apk\release\app-release.apk" "$repo\ScamGuardian.apk" -Force
-$size = [math]::Round((Get-Item "$repo\ScamGuardian.apk").Length / 1MB, 1)
+$apk = Join-Path $build 'android\app\build\outputs\apk\release\app-release.apk'
+$out = Join-Path $repo 'ScamGuardian.apk'
+Copy-Item $apk $out -Force
+$size = [math]::Round((Get-Item $out).Length / 1MB, 1)
 Set-Location $repo
-Write-Host "`nBUILD READY: $repo\ScamGuardian.apk ($size MB)" -ForegroundColor Green
+Write-Host "`nBUILD READY: $out ($size MB)" -ForegroundColor Green

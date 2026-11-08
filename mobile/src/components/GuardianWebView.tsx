@@ -47,7 +47,7 @@ export default function GuardianWebView() {
   const [failed, setFailed] = useState<string | null>(null);
   const [key, setKey] = useState(0);
   const recorder = useAudioRecorder(RECORDING);
-  const recState = useAudioRecorderState(recorder, 120);
+  const [recording, setRecording] = useState(false);
   const cancelled = useRef(false);
   const source = uiSource();
 
@@ -61,13 +61,6 @@ export default function GuardianWebView() {
     });
     return () => sub.remove();
   }, [run]);
-
-  /* live microphone level for the recorder sheet */
-  useEffect(() => {
-    if (!recState.isRecording || typeof recState.metering !== 'number') return;
-    const level = Math.round(((recState.metering + 60) / 60) * 100);
-    run(`window.SGNative.onLevel&&window.SGNative.onLevel(${level})`);
-  }, [recState.isRecording, recState.metering, run]);
 
   const reply = useCallback(
     (payload: { b64?: string; mime?: string; error?: string }) =>
@@ -83,6 +76,7 @@ export default function GuardianWebView() {
       cancelled.current = false;
       await recorder.prepareToRecordAsync();
       recorder.record({ forDuration: 30 });
+      setRecording(true);
     } catch (e) {
       reply({ error: e instanceof Error ? e.message : String(e) });
     }
@@ -91,6 +85,7 @@ export default function GuardianWebView() {
   const stopRecording = useCallback(
     async (discard: boolean) => {
       cancelled.current = discard;
+      setRecording(false);
       try {
         await recorder.stop();
         await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
@@ -162,6 +157,7 @@ export default function GuardianWebView() {
   return (
     <SafeAreaView style={[styles.fill, { backgroundColor: bg }]} edges={['top', 'bottom']}>
       <StatusBar style={dark ? 'light' : 'dark'} />
+      {recording && <RecordingLevel recorder={recorder} onLevel={level => run(`window.SGNative.onLevel&&window.SGNative.onLevel(${level})`)} />}
       {failed ? (
         <View style={[styles.fill, styles.center]}>
           <Text style={[styles.title, { color: dark ? '#E9EAEC' : '#10151F' }]}>Scam Guardian</Text>
@@ -198,6 +194,15 @@ export default function GuardianWebView() {
       )}
     </SafeAreaView>
   );
+}
+
+/** Polls the microphone level only while recording (mounted only then), so the screen does not re-render otherwise. */
+function RecordingLevel({ recorder, onLevel }: { recorder: ReturnType<typeof useAudioRecorder>; onLevel: (level: number) => void }) {
+  const state = useAudioRecorderState(recorder, 150);
+  useEffect(() => {
+    if (state.isRecording && typeof state.metering === 'number') onLevel(Math.round(((state.metering + 60) / 60) * 100));
+  }, [state.isRecording, state.metering, onLevel]);
+  return null;
 }
 
 const styles = StyleSheet.create({
