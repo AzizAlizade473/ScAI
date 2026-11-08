@@ -1,0 +1,15 @@
+# One-click deploy of the Scam Guardian API on Render (https://render.com) — Blueprint.
+# After creating the service, set GEMINI_API_KEY in the dashboard (it is never committed).
+services:
+  - type: web
+    name: scam-guardian
+    runtime: node
+    plan: free
+    buildCommand: "echo no build needed"
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: GEMINI_API_KEY
+        sync: false

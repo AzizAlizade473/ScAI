@@ -154,6 +154,16 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
   const p = url.pathname;
   try {
+    /* The Android app loads its UI from the APK (file://, Origin "null") and calls this API across origins.
+     * Only that origin gets CORS; other websites still cannot spend this server's Gemini quota. */
+    if (req.headers.origin === 'null' && p.startsWith('/api/')) {
+      res.setHeader('Access-Control-Allow-Origin', 'null');
+      res.setHeader('Vary', 'Origin');
+      if (req.method === 'OPTIONS') {
+        res.writeHead(204, { 'Access-Control-Allow-Methods': 'GET, POST, DELETE', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Max-Age': '600' });
+        return res.end();
+      }
+    }
     if (req.method !== 'GET' && req.method !== 'HEAD') sameOrigin(req);
 
     if (req.method === 'GET' && p === '/api/health') {

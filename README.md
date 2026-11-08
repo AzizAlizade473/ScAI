@@ -34,4 +34,9 @@ The free Gemini tier has small per-model limits (some models allow 10–20 reque
 through models with separate quotas and caches identical results, and labels them "cache". Turn on
 **Settings → Technical details** to force fresh calls.
 
+## Android app
+
+`mobile/` is an Expo (TypeScript, Expo Router) Android app. It runs the same UI, with native recording, vibration and back
+button, and connects to this server. Build an installable APK with EAS: see [mobile/README.md](mobile/README.md).
+
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the design and [DEMO.md](DEMO.md) for the 90-second demo.

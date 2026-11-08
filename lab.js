@@ -22,7 +22,7 @@ Object.assign(I, {
 /* ---------------- strings ---------------- */
 const LSTR = {
 az: {
- 'nav.check': 'Yoxla', 'nav.lab': 'Laboratoriya', 'menu.settings': 'Ayarlar', 'set.title': 'Ayarlar',
+ 'nav.check': 'Yoxla', 'set.server': 'Server ünvanı', 'set.serverB': 'Süni intellekt serveri. Telefon və noutbuk eyni Wi-Fi şəbəkəsindədirsə, noutbukun IP ünvanını yazın (məs: http://192.168.1.10:8787) və ya yerləşdirilmiş serverin https ünvanını.', 'set.serverBad': 'Ünvan http:// və ya https:// ilə başlamalıdır.', 'nav.lab': 'Laboratoriya', 'menu.settings': 'Ayarlar', 'set.title': 'Ayarlar',
  'chk.title': 'Mesajı yoxla', 'chk.lead': 'Şübhəli SMS, WhatsApp mesajı, link və ya zəng mətnini yapışdırın. Qaydalar və süni intellekt birlikdə yoxlayır.',
  'chk.ph': 'Mesajı bura yapışdırın…', 'chk.run': 'Yoxla', 'chk.voice': 'Səslə', 'chk.known': 'Göndərən kontaktlarımdadır', 'chk.samples': 'Nümunələr',
  'chk.empty': 'Mətn yazın və ya nümunə seçin.', 'chk.busy': 'Yoxlanılır…',
@@ -62,7 +62,7 @@ az: {
  'tac.emotional_manipulation': 'Emosional təzyiq', 'tac.other': 'Digər',
 },
 ru: {
- 'nav.check': 'Проверка', 'nav.lab': 'Лаборатория', 'menu.settings': 'Настройки', 'set.title': 'Настройки',
+ 'nav.check': 'Проверка', 'set.server': 'Адрес сервера', 'set.serverB': 'Сервер ИИ. Если телефон и ноутбук в одной сети Wi-Fi, укажите IP ноутбука (напр. http://192.168.1.10:8787) или https-адрес развёрнутого сервера.', 'set.serverBad': 'Адрес должен начинаться с http:// или https://.', 'nav.lab': 'Лаборатория', 'menu.settings': 'Настройки', 'set.title': 'Настройки',
  'chk.title': 'Проверить сообщение', 'chk.lead': 'Вставьте подозрительное SMS, сообщение WhatsApp, ссылку или текст звонка. Правила и ИИ проверяют вместе.',
  'chk.ph': 'Вставьте сообщение сюда…', 'chk.run': 'Проверить', 'chk.voice': 'Голосом', 'chk.known': 'Отправитель есть в контактах', 'chk.samples': 'Примеры',
  'chk.empty': 'Введите текст или выберите пример.', 'chk.busy': 'Проверяем…',
@@ -102,7 +102,7 @@ ru: {
  'tac.emotional_manipulation': 'Эмоциональное давление', 'tac.other': 'Другое',
 },
 en: {
- 'nav.check': 'Check', 'nav.lab': 'Lab', 'menu.settings': 'Settings', 'set.title': 'Settings',
+ 'nav.check': 'Check', 'set.server': 'Server address', 'set.serverB': 'The AI server. If the phone and laptop share a Wi-Fi network, enter the laptop\'s IP (e.g. http://192.168.1.10:8787), or the https address of a deployed server.', 'set.serverBad': 'The address must start with http:// or https://.', 'nav.lab': 'Lab', 'menu.settings': 'Settings', 'set.title': 'Settings',
  'chk.title': 'Check a message', 'chk.lead': 'Paste a suspicious SMS, WhatsApp message, link or call text. Rules and AI check it together.',
  'chk.ph': 'Paste the message here…', 'chk.run': 'Check', 'chk.voice': 'Voice', 'chk.known': 'The sender is in my contacts', 'chk.samples': 'Examples',
  'chk.empty': 'Type a text or pick an example.', 'chk.busy': 'Checking…',
@@ -155,14 +155,14 @@ Object.assign(state, {
 });
 if (saved.sound === false) state.sound = false;
 const saveSettings = () => store.set(SETTINGS_KEY, JSON.stringify({ autoScan: state.autoScan, judge: state.judge, sound: state.sound }));
-const SERVER = location.protocol.startsWith('http');
+const SERVER = HAS_SERVER();
 NAV_SCREENS.push('check', 'lab');
 
 async function api(path, o = {}) {
-  if (!SERVER) throw new Error(t('err.noServer'));
+  if (!HAS_SERVER()) throw new Error(t('err.noServer'));
   const headers = Object.assign(o.json ? { 'Content-Type': 'application/json' } : {}, o.headers || {});
   let r;
-  try { r = await fetch(path, { method: o.method || 'GET', headers, body: o.json ? JSON.stringify(o.json) : o.body }); }
+  try { r = await fetch(API_BASE() + path, { method: o.method || 'GET', headers, body: o.json ? JSON.stringify(o.json) : o.body }); }
   catch (e) { throw new Error(t('err.noServer')); }
   const ct = r.headers.get('content-type') || '';
   const data = ct.includes('json') ? await r.json().catch(() => ({})) : await r.blob();
@@ -312,8 +312,23 @@ function encodeWav(samples, rate) {
   return new Blob([buf], { type: 'audio/wav' });
 }
 let recCtx = null;
+function b64Blob(b64, type) { const s = atob(b64), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return new Blob([u], { type }); }
+window.SGNative.onRecording = function (m) {        /* from the app: {b64, mime} or {error} */
+  const r = state.rec; if (!r) return;
+  clearInterval(r.timer); r.on = false;
+  if (m.error) r.err = m.error === 'denied' ? t('rec.noMic') : t('err.generic', { m: m.error });
+  else { r.wav = b64Blob(m.b64, m.mime || 'audio/aac'); if (r.wav.size < 2000) { r.wav = null; r.err = t('rec.max'); } }
+  renderSheet();
+};
+window.SGNative.onLevel = function (v) { const l = $('#recLvl'); if (l) l.style.width = Math.max(0, Math.min(100, v)) + '%'; };
 async function recStart() {
   const r = state.rec;
+  if (SGN.on) {
+    Object.assign(r, { on: true, sec: 0, wav: null, err: null });
+    SGN.send({ type: 'rec-start', maxSec: 30 });
+    r.timer = setInterval(() => { r.sec++; const e = $('#recTime'); if (e) e.textContent = fmtTime(r.sec); if (r.sec >= 30) recStop(); }, 1000);
+    renderSheet(); return;
+  }
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -333,7 +348,9 @@ async function recStart() {
   } catch (e) { r.err = t('rec.noMic'); renderSheet(); }
 }
 function recStop() {
-  const r = state.rec; if (!recCtx || !r) return;
+  const r = state.rec;
+  if (SGN.on && r && r.on) { clearInterval(r.timer); SGN.send({ type: 'rec-stop' }); return; }   /* the app answers with onRecording */
+  if (!recCtx || !r) return;
   clearInterval(r.timer);
   recCtx.proc.disconnect(); recCtx.stream.getTracks().forEach(tr => tr.stop()); recCtx.ctx.close();
   const n = recCtx.chunks.reduce((s, c) => s + c.length, 0), all = new Float32Array(n); let o = 0;
@@ -346,7 +363,7 @@ async function recSend() {
   const r = state.rec; if (!r || !r.wav) return;
   r.busy = true; renderSheet();
   try {
-    const out = await api('/api/transcribe?fresh=1&store=0', { method: 'POST', body: r.wav, headers: { 'Content-Type': 'audio/wav' } });
+    const out = await api('/api/transcribe?fresh=1&store=0', { method: 'POST', body: r.wav, headers: { 'Content-Type': r.wav.type || 'audio/wav' } });
     const target = r.for;
     state.rec = null; renderSheet();
     if (!out.text) throw new Error('—');
@@ -361,6 +378,11 @@ async function recSend() {
 
 /* ---------------- Simulation Lab: voiced calls with real speech-to-text ---------------- */
 let labAudio = null;
+/* bundled clips: fetch() for http(s)/blob, XMLHttpRequest for file:// (the Android app's bundled copy) */
+function getBlob(url) {
+  if (location.protocol !== 'file:' || /^(blob:|https?:)/.test(url)) return fetch(url).then(r => { if (!r.ok) throw new Error('audio ' + r.status); return r.blob(); });
+  return new Promise((ok, no) => { const x = new XMLHttpRequest(); x.open('GET', url); x.responseType = 'blob'; x.onload = () => (x.status === 0 || x.status === 200) && x.response && x.response.size ? ok(x.response) : no(new Error('audio ' + x.status)); x.onerror = () => no(new Error('audio unavailable')); x.send(); });
+}
 window.labStop = () => { if (labAudio) { try { labAudio.pause(); } catch (e) {} labAudio = null; } };
 function scenarioScript(sc) {
   return { id: sc.id, lab: true, kind: sc.kind, sms: sc.smsAt, lines: sc.lines.map(([who, text, en], i) => ({ who, ref: text, en, audio: `audio/${sc.id}/${i}.wav` })) };
@@ -415,7 +437,7 @@ window.labLine = function (c, k) {
     typeLine(c, i, () => { if (c.phase === 'listening') lineDone(i); else if (c.typing === i) c.typing = -1; textDone = true; next(); });
   };
   const t0 = performance.now();
-  fetch(src.audio).then(r => { if (!r.ok) throw new Error('audio ' + r.status); return r.blob(); }).then(blob => {
+  getBlob(src.audio).then(blob => {
     if (state.call !== c) return;
     const url = URL.createObjectURL(blob), a = new Audio(url);
     labAudio = a;                                                /* Mute is the user's microphone; the caller stays audible */
@@ -637,6 +659,11 @@ R.settings = () => {
     <h2 class="lb-sec">${t('set.ai')}</h2>
     <div class="lb-card"><p style="color:var(--text)"><span class="stat-dot ${h.gemini ? 'on' : ''}"></span>${h.gemini ? t('set.on') : t('set.off')}</p>
       ${h.gemini ? `<table class="tech" style="margin-top:8px"><tr><th>${t('res.ai')}</th><td>${esc(h.model)}</td></tr><tr><th>${t('lab.stt')}</th><td>${esc(h.stt)}</td></tr><tr><th>TTS</th><td>${esc(h.tts)}</td></tr><tr><th>${t('menu.alerts')}</th><td>${h.history | 0}</td></tr></table>` : `<p class="hint" style="text-align:left">${esc(h.error || '')}</p>`}</div>
+    ${SGN.on ? `<h2 class="lb-sec">${t('set.server')}</h2>
+    <div class="lb-card"><p>${t('set.serverB')}</p>
+      <label class="sr-only" for="apiBase">${t('set.server')}</label>
+      <input id="apiBase" class="lb-ta" style="min-height:48px;margin-top:10px" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="http://192.168.1.10:8787" value="${esc(API_BASE())}">
+      <div class="lb-row"><button class="lb-btn primary" data-action="setServer">${ic('check')}${t('family.save')}</button></div></div>` : ''}
     <h2 class="lb-sec">${t('set.privacy')}</h2>
     <div class="lb-card"><p>${t('set.privacyB')}</p><div class="lb-row"><button class="lb-btn" data-action="setClear">${ic('trash')}${t('set.clear')}</button></div></div>
     <h2 class="lb-sec">${t('set.about')}</h2>
@@ -657,7 +684,7 @@ Object.assign(A, {
     catch (e) { snack(t('err.generic', { m: e.message })); }
   },
   recOpen(el) { state.sheet = false; state.rec = { for: el.dataset.for, consent: false, on: false, sec: 0 }; renderSheet(); },
-  recClose() { if (state.rec && state.rec.on) recStop(); state.rec = null; renderSheet(); },
+  recClose() { if (state.rec && state.rec.on) { if (SGN.on) SGN.send({ type: 'rec-cancel' }); else recStop(); } state.rec = null; renderSheet(); },
   recToggle() { if (!state.rec) return; if (state.rec.on) recStop(); else recStart(); },
   recSend() { recSend(); },
   labStart(el) { state.lab.demo = false; const sc = Scenarios.byId(el.dataset.id); if (sc) startLab(sc); },
@@ -695,6 +722,13 @@ Object.assign(A, {
     try { await api('/api/history', { method: 'DELETE' }); state.hist.items = null; snack(t('set.cleared')); loadHealth(); } catch (e) { snack(t('err.generic', { m: e.message })); }
   },
   evidence() { state.sheet = 'evidence'; renderSheet(); },
+  async setServer() {
+    const v = String($('#apiBase')?.value || '').trim().replace(/\/+$/, '');
+    if (v && !/^https?:\/\/[^\s/]+/i.test(v)) { snack(t('set.serverBad')); return; }
+    try { v ? localStorage.setItem('sg.apiBase', v) : localStorage.removeItem('sg.apiBase'); } catch (e) {}
+    state.health = null; await loadHealth(); detectAI(); render();
+    snack(state.health && state.health.gemini ? t('set.on') : t('set.off'));
+  },
 });
 document.addEventListener('input', e => {
   if (e.target.id === 'chkText') state.check.text = e.target.value;
