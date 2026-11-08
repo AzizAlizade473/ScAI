@@ -1,0 +1,83 @@
+# Yunex backend: one command starts everything.  ->  docker compose up -d --build
+# Every password and key comes from Backend/.env (copy .env.example). Nothing secret is written here.
+# Inside the network, services reach each other by name (mysql:3306), never localhost.
+
+name: yunex
+
+services:
+  mysql:
+    image: mysql:8.4
+    command: ["--default-time-zone=+00:00", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in Backend/.env}
+      MYSQL_APP_USER: ${MYSQL_APP_USER:?set MYSQL_APP_USER in Backend/.env}
+      MYSQL_APP_PASSWORD: ${MYSQL_APP_PASSWORD:?set MYSQL_APP_PASSWORD in Backend/.env}
+      MYSQL_PIPELINE_USER: ${MYSQL_PIPELINE_USER:?set MYSQL_PIPELINE_USER in Backend/.env}
+      MYSQL_PIPELINE_PASSWORD: ${MYSQL_PIPELINE_PASSWORD:?set MYSQL_PIPELINE_PASSWORD in Backend/.env}
+    volumes:
+      - mysql_data:/var/lib/mysql                         # the data outlives the container
+      - ./db/init:/docker-entrypoint-initdb.d:ro          # schema, run once on the first start
+    ports:
+      - "127.0.0.1:${MYSQL_PORT:-3306}:3306"             # only your laptop can connect
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_ROOT_PASSWORD\" mysqladmin ping -h 127.0.0.1 -uroot --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    restart: unless-stopped
+
+  app:
+    build:
+      context: ..                                         # the repo root: server.js, index.html, audio/
+      dockerfile: Backend/app/Dockerfile
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-}
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_USER: ${MYSQL_APP_USER}
+      DB_PASSWORD: ${MYSQL_APP_PASSWORD}
+      DB_NAME: app
+    volumes:
+      - app_data:/data                                    # speech caches (tts-cache, cache.json)
+    ports:
+      - "${APP_PORT:-8787}:8787"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  pipeline:
+    build: { context: ., dockerfile: pipeline/Dockerfile }
+    environment:
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_USER: ${MYSQL_PIPELINE_USER}
+      DB_PASSWORD: ${MYSQL_PIPELINE_PASSWORD}
+      INBOX_DIR: /inbox
+      PIPELINE_EVERY_MINUTES: ${PIPELINE_EVERY_MINUTES:-0}
+      GOV_SCAM_API_URL: ${GOV_SCAM_API_URL:-}
+      GOV_SCAM_API_TOKEN: ${GOV_SCAM_API_TOKEN:-}
+    volumes:
+      - ./inbox:/inbox:ro                                 # read-only: the pipeline never changes source files
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: "no"                                         # runs once and stops (unless PIPELINE_EVERY_MINUTES > 0)
+
+  adminer:                                                # look inside the database in the browser
+    image: adminer:4.8.1
+    command: ["php", "-S", "0.0.0.0:8080", "-t", "/var/www/html"]   # IPv4, works on every laptop
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+    ports:
+      - "127.0.0.1:${ADMINER_PORT:-8081}:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  app_data:

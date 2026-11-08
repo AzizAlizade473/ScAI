@@ -1,0 +1,6 @@
+# Secrets stay local: only .env.example is committed.
+.env
+node_modules/
+# Files dropped in the inbox are data, not code.
+inbox/*
+!inbox/README.md
