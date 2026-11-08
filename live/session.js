@@ -8,8 +8,9 @@
  * Client → server: binary = PCM16 mono 16 kHz; JSON {type:'start'|'played'|'detector'|'end'|'clientMetric'}
  * Server → client: binary = PCM16 mono 24 kHz (caller voice); JSON events (see send() calls). */
 const crypto = require('crypto');
+const ScamCheck = require('../scam-check.js');
 const Personas = require('./personas');
-const { EnergyVad } = require('./vad');
+const { EnergyVad, pcmToWav } = require('./vad');
 const { LiveScammer } = require('./scammer-live');
 const { TurnScammer } = require('./scammer-turn');
 const { ThreatDetector } = require('./detector');
@@ -63,6 +64,12 @@ class LiveCallSession {
     /** @type {number[]} */ this.rulesMs = [];
     /** @type {any[]} */ this.clientMetrics = [];
     /** @type {import('./types').StageMetrics | null} */ this.pendingStages = null;
+    /* the user's speech, kept in memory only until it is transcribed (independent speech-to-text) */
+    /** @type {Buffer[]} */ this.pre = [];
+    /** @type {Buffer[] | null} */ this.utt = null;
+    /** @type {Buffer[]} */ this.segs = [];
+    /** lines are emitted in order even when the user's transcript is still being produced */
+    /** @type {Promise<void>} */ this.lineQueue = Promise.resolve();
     this.state = 'connecting';
     this.started = false;
     active.add(this);
@@ -208,10 +215,12 @@ class LiveCallSession {
   /** @param {Buffer} b */
   _onAudio(b) {
     if (!this.agent || this.ended || b.length % 2 || b.length > 64000) return;
+    if (this.utt && this.utt.length < 300) this.utt.push(b);
     for (const e of this.vad.push(b)) {
-      if (e.type === 'start') { this._clearSilence(); this.silenceIdx = 0; this.send({ type: 'vad', speaking: true, t: this.now() }); if (!this.replyStarted) this.setState('listening'); }
-      else { this.userEndAt = Date.now() - this.vad.endFrames * 20; /* last voiced frame, not the end of the hangover */ this.send({ type: 'vad', speaking: false, speechMs: e.speechMs, t: this.now() }); if (!this.replyStarted) this.setState('thinking'); }
+      if (e.type === 'start') { this.utt = this.pre.concat([b]); this.pre = []; this._clearSilence(); this.silenceIdx = 0; this.send({ type: 'vad', speaking: true, t: this.now() }); if (!this.replyStarted) this.setState('listening'); }
+      else { if (this.utt) { this.segs.push(Buffer.concat(this.utt)); this.utt = null; } this.userEndAt = Date.now() - this.vad.endFrames * 20; /* last voiced frame, not the end of the hangover */ this.send({ type: 'vad', speaking: false, speechMs: e.speechMs, t: this.now() }); if (!this.replyStarted) this.setState('thinking'); }
     }
+    if (!this.utt) { this.pre.push(b); if (this.pre.length > 3) this.pre.shift(); }
     this.agent.sendAudio(b);
   }
 
@@ -244,29 +253,53 @@ class LiveCallSession {
     if (this.inTimer) clearTimeout(this.inTimer);
     this.inTimer = setTimeout(() => this._finishUserLine(), ms);
   }
+  /* The user's line. In Live mode the user's speech is transcribed again, independently of the scammer's
+   * session, by the speech-to-text model (more accurate for Azerbaijani); if that fails or is slow the Live
+   * transcript is used, and the line says which source it came from. */
   _finishUserLine() {
     if (this.inTimer) clearTimeout(this.inTimer);
     this.inTimer = null;
-    const text = this.inBuf.replace(/\s+/g, ' ').trim();
-    if (!text) return;
+    const liveText = this.inBuf.replace(/\s+/g, ' ').trim();
+    this.inBuf = '';
+    const segs = this.segs; this.segs = [];
+    if (!liveText) return;                                     /* Live heard no words: noise, not speech */
     const m = this.metrics[this.metrics.length - 1];
     const ue = this.turnUserEnd || this.userEndAt;
     if (m && m.sttLagMs == null && ue && this.lastInAt >= ue) m.sttLagMs = this.lastInAt - ue;
-    this.inBuf = '';
-    this._addLine('you', text, false);
+    const audio = Buffer.concat(segs);
+    const live = !!this.agent && this.agent.mode === 'live';
+    const stt = live && audio.length > 16000 * 2 * 0.35 ? this._transcribe(audio) : Promise.resolve(null);
+    const liveSource = this.agent ? (live ? this.agent.model + ' (Live ASR)' : 'gemini-3.5-transcribe') : '';
+    this.lineQueue = this.lineQueue.then(async () => {
+      const r = await stt;
+      if (r && r.text) {
+        if (m) m.stages = Object.assign({}, m.stages, { sttMs: r.ms, sttModel: r.model });
+        this._addLine('you', r.text, false, r.model + ' (STT)');
+      } else this._addLine('you', liveText, false, liveSource);
+    });
+  }
+  /** @param {Buffer} pcm16k @returns {Promise<{text: string, model: string, ms: number} | null>} */
+  _transcribe(pcm16k) {
+    const timeout = new Promise(ok => setTimeout(() => ok(null), 5000));
+    const run = ScamCheck.transcribe({ apiKey: this.o.apiKey, baseUrl: this.o.baseUrl, mimeType: 'audio/wav', audioBase64: pcmToWav(pcm16k, 16000).toString('base64'), timeoutMs: 5000 })
+      .then(/** @param {any} r */ r => ({ text: String(r.text || '').trim(), model: r.model, ms: r.ms }))
+      .catch(() => null);
+    return Promise.race([run, timeout]).then(/** @param {any} x */ x => x);
   }
   /** @param {boolean} cut */
   _finishCallerLine(cut) {
-    if (this.inBuf && this.inTimer) this._finishUserLine();     /* keep the order: the user's line first */
+    if (this.inTimer) this._finishUserLine();                   /* keep the order: the user's line first */
     const text = this.outBuf.replace(/\s+/g, ' ').trim();
     this.outBuf = '';
-    if (text) this._addLine('caller', text, cut);
+    if (!text) return;
+    const source = this.agent ? (this.agent.mode === 'live' ? this.agent.model + ' (Live ASR)' : 'LLM text') : '';
+    this.lineQueue = this.lineQueue.then(() => this._addLine('caller', text, cut, source));
   }
-  /** @param {'caller'|'you'} who @param {string} text @param {boolean} cut */
-  _addLine(who, text, cut) {
+  /** @param {'caller'|'you'} who @param {string} text @param {boolean} cut @param {string} source */
+  _addLine(who, text, cut, source) {
+    if (!this.conn.open) return;
     /** @type {import('./types').TranscriptLine} */
-    const line = { id: this.lines.length + 1, who, text: maskDigits(text), at: this.now(), source: this.agent ? (this.agent.mode === 'live' ? this.agent.model + ' (ASR)' : 'gemini-3.5-transcribe') : '', cut };
-    if (who === 'caller' && this.agent && this.agent.mode === 'turn') line.source = 'LLM text';
+    const line = { id: this.lines.length + 1, who, text: maskDigits(text), at: this.now(), source, cut };
     this.lines.push(line);
     this.send(Object.assign({ type: 'line' }, line));
     if (this.detector) this.detector.addLine(line);

@@ -18,7 +18,7 @@ const LSTR = {
   'lv.end.user_hung_up': 'Zəngi bitirdiniz', 'lv.end.caller_hung_up': 'Zəng edən dəstəyi qoydu', 'lv.end.silence': 'Cavab olmadığı üçün zəng bitdi', 'lv.end.time_limit': 'Vaxt limiti: zəng bitdi', 'lv.end.network': 'AI bağlantısı kəsildi', 'lv.end.error': 'Canlı zəng başlamadı',
   'lv.noMic': 'Mikrofona icazə verilmədi', 'lv.fallback': 'Gemini Live əlçatan deyil: növbəli rejim (STT → LLM → TTS), cavablar gec gəlir', 'lv.noTts': 'Səs sintezi əlçatan deyil: cavab yalnız mətn kimi',
   'ev.turn': 'Növbə', 'ev.note': 'Qeyd', 'ev.cut': 'Kəsildi', 'lv.reply': 'cavab', 'lv.sttLag': 'transkript',
-  'lv.a.mic': 'Mikrofon və VAD', 'lv.a.micD': 'Telefonda: exo-ləğv, səs-küyün azaldılması, eko qapısı (zəng edən danışarkən dinamikin səsi geri getmir). 16 kHz PCM. Serverdə enerji VAD: nitqin sonu, gecikmə ölçüsü.',
+  'lv.a.mic': 'Mikrofon və VAD', 'lv.a.micD': 'Telefonda: əks-sədanın ləğvi, səs-küyün azaldılması, əks-səda qapısı (zəng edən danışarkən dinamikin səsi geri getmir). 16 kHz PCM. Serverdə enerji VAD: nitqin sonu, gecikmə ölçüsü.',
   'lv.a.agent': 'Fırıldaqçı AI', 'lv.a.agentLive': 'Gemini Live, səsdən səsə: nitqi anlama, cavab və səs bir modeldə, axınla. Növbə Google VAD ilə; siz danışanda o susur (kəsmə).', 'lv.a.agentTurn': 'Növbəli ehtiyat: VAD seqmenti → STT → LLM (JSON) → TTS. Hər mərhələ ayrıca ölçülür; tam dupleks deyil.',
   'lv.a.tr': 'Transkript', 'lv.a.trD': 'Real səsin nitq tanıması (sizin mikrofon və zəng edənin səsi). Uzun rəqəmlər ekrana çıxmır.',
   'lv.a.det': 'Müstəqil detektor', 'lv.a.detD': 'rules.js hər cümlədə + ayrı Gemini təsnifatçısı son 14 cümlədə. Fırıldaqçının promptunu və vəziyyətini görmür; nəticəsi fırıldaqçıya getmir.',
@@ -67,6 +67,7 @@ const LSTR = {
 for (const l of Object.keys(LSTR)) Object.assign(STR[l], LSTR[l]);
 
 state.live = { persona: 'bank', consent: false, last: null, lastPersona: null };
+try { state.live.last = JSON.parse(store.get('sg.liveLast') || 'null'); } catch (e) {}   /* last call's measured numbers, this device only */
 const L = () => state.lang;
 const msTxt = v => (v == null ? '—' : v >= 1000 ? (v / 1000).toFixed(1) + ' s' : Math.round(v) + ' ms');
 const liveInfo = () => (state.health && state.health.live) || null;
@@ -291,6 +292,7 @@ class LiveCall {
     if (this.ended) return;
     this.summary = m.summary || null;
     state.live.last = Object.assign({}, this.summary || {}, { m2eP50: p50(this.m2e), persona: this.persona, at: Date.now() });
+    store.set('sg.liveLast', JSON.stringify(state.live.last));
     this.close(false);
     if (state.call === this.c) {
       this._timeline('note', t('lv.end.' + m.reason) || m.reason);

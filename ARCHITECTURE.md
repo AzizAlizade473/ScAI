@@ -35,8 +35,23 @@ It ships two ways: a web app with a Node.js API, and an Android app (React Nativ
 - **Evidence timeline.** Timestamped speech-to-text results, rule hits, AI verdicts with model and latency, and
   level changes.
 
+### Live AI call (Lab → Canlı AI zəng)
+- An AI scammer calls the phone and holds an **unscripted Azerbaijani voice conversation**: it hears the user's
+  real voice, understands the answer and replies to it. No line is pre-written.
+- Three fictional personas: fake bank security officer (card number + SMS code), fake police officer ("safe
+  account", secrecy), fake investment manager (guaranteed profit, AnyDesk). Male voices.
+- Natural turn-taking: Gemini's voice activity detection decides when the user has finished; the user can
+  interrupt (barge-in) and the caller stops at once. Silence gets "Alo? Məni eşidirsiniz?" after 9 and 18 s;
+  after ~27 s the caller says goodbye and hangs up. The caller also ends the call itself after firm refusals.
+- **Scam Guardian analyses the same call independently** and shows evidence, risk and the in-call warning
+  exactly as on a normal call. A pill on the call screen shows *Dinləyir / Siz danışırsınız / Düşünür / Danışır*.
+- Explicit microphone consent (checkbox) before the call; audio is streamed, never stored.
+
 ### Judge mode
 - Judges type any text, or record their own voice (with a consent checkbox), and see the result.
+- In a live AI call, Judge mode shows the transcript source (model) and the reply latency under every line, and
+  the Evidence sheet lists every turn with its measured latency plus a **How it works** view of the real pipeline
+  with this call's numbers.
 - **Technical details:** rules, AI and final scores, latency, model, cache flag, and the redacted text that was sent.
 - Recordings are sent with `?fresh=1&store=0`: neither the audio nor the transcript is stored.
 
@@ -76,8 +91,10 @@ It ships two ways: a web app with a Node.js API, and an Android app (React Nativ
 - The config plugin `plugins/withWebAssets.js` copies the web UI and all voice clips into the APK assets. The APK
   needs no Metro and no internet to open; only AI calls need the server.
 - `GuardianWebView.tsx` injects `SG_NATIVE` and `SG_API_BASE` before the page loads. The page sends messages to the
-  app (`vibrate`, `theme`, `exit`, `rec-start`, `rec-stop`, `rec-cancel`); the app answers with injected JavaScript.
-- Voice recording: AAC, 16 kHz mono, microphone permission asked at first use.
+  app (`vibrate`, `theme`, `exit`, `rec-start`, `rec-stop`, `rec-cancel`, `mic-permission`); the app answers with injected JavaScript.
+- Voice recording: AAC, 16 kHz mono, microphone permission asked at first use. The live AI call opens the
+  microphone inside the WebView (`getUserMedia`, granted by `mediaCapturePermissionGrantType`) after the app has
+  the Android microphone permission.
 - Builds: EAS profiles `development` (dev client), `preview` (APK), `production` (AAB). A local Windows build
   script (`mobile/scripts/build-apk-local.ps1`) makes `ScamGuardian.apk` without an Expo account.
 
@@ -98,8 +115,67 @@ It ships two ways: a web app with a Node.js API, and an Android app (React Nativ
 | `scenarios.js`, `audio/` | Lab scripts, voices, ground-truth labels; 35 WAV clips (16 kHz mono) |
 | `server.js`, `store.js` | HTTP API, validation, rate limit, origin check, persistence, caches |
 | `eval/` | Labelled dataset, runner, measured results |
+| `live.js` | Live AI call client: mic capture, echo gate, player, call-screen integration, architecture sheet |
+| `live/` | Live AI call server modules (see section 2a) |
+| `scripts/test-live.js` | End-to-end live call tests with real recorded speech; writes `eval/live-results.json` |
 | `mobile/` | Expo Android app |
 | `render.yaml`, `Dockerfile` | Server deployment |
+
+## 2a. Live AI call
+
+```
+ phone (live.js)                         server (live/session.js, one per WebSocket)            Google
+ ┌───────────────────────────┐  PCM16   ┌───────────────────────────────────────────────┐
+ │ MicCapture                │  16 kHz  │ EnergyVad ── end of speech → latency, silence │
+ │  getUserMedia: echo canc.,│ ───────► │      │                                         │  WebSocket
+ │  noise suppr., AGC        │          │      ▼                                         │ ◄────────► Gemini Live
+ │  echo gate + barge-in     │          │ ScammerAgent  LiveScammer (native audio,       │  (gemini-3.8-live,
+ │ Player (24 kHz, gapless)  │ ◄─────── │               VAD, barge-in, end_call tool)    │   3.1-flash-live,
+ │ pill: listening/thinking/ │  PCM16   │               TurnScammer fallback:            │   2.5 native audio)
+ │       speaking            │  24 kHz  │               VAD → STT → LLM → TTS            │
+ │                           │          │      │ transcripts (ASR of the real audio)     │
+ │ existing call screen:     │  JSON    │      ▼                                         │
+ │  transcript, evidence,    │ ◄─────── │ ThreatDetector  rules.js + separate classifier │ ──► gemini-3.5-flash-lite
+ │  risk meter, warning      │  events  │ RiskAggregator  fuse + danger latch            │
+ └───────────────────────────┘          └───────────────────────────────────────────────┘
+```
+
+| Module | Responsibility |
+|---|---|
+| `live/ws.js` | Minimal RFC 6455 WebSocket server (no dependencies): frames, fragmentation, ping, size limit |
+| `live/vad.js` | Energy VAD with a minimum-tracking noise floor: speech start / end on 20 ms frames |
+| `live/personas.js` | Fictional scammer personas and the shared system prompt (tactics, behaviour, safety rules) |
+| `live/scammer-live.js` | Gemini Live client: model fallback with cooldowns, setup, audio in/out, transcripts, `end_call` tool |
+| `live/scammer-turn.js` | Turn-based fallback: VAD segment → `gemini-3.5-transcribe` → LLM JSON reply → Gemini TTS, each timed |
+| `live/detector.js` | Independent detector: rules on every caller sentence, debounced single-flight AI classification |
+| `live/risk.js` | Risk aggregation with `rules.js` fusion; danger is latched for the rest of the call |
+| `live/session.js` | Orchestrator: protocol, turn bookkeeping, silence handling, limits, metrics, clean shutdown |
+| `live/types.js` | JSDoc type definitions; `tsc -p live` type-checks the server modules |
+
+**Why Gemini Live.** One native-audio model does speech understanding, the reply and the voice, streamed. The
+reply starts about a second after the user stops talking (measured below). Turn-taking is VAD-based with
+barge-in: it is a streamed, interruptible conversation, not a full-duplex one where both talk over each other.
+If no Live model is available (quota, outage), the session falls back to the turn-based pipeline and the app
+says so; that path is slower, and its STT, LLM and TTS times are measured separately.
+
+**Independence of the detector.** The detector's only input is the transcript of the actual audio. It never sees
+the scammer's prompt, persona or state, runs on a different model with its own prompt that treats the transcript
+as hostile data, and nothing it produces is sent to the scammer. The risk can only go up to danger and stay there.
+
+**Echo and feedback.** The phone uses the platform's echo cancellation, plus an echo gate: while the caller's
+voice plays, the microphone sends silence unless the user clearly talks over it; then the last ~170 ms are sent
+too and the local playback stops at once (barge-in). Gemini Live generates faster than real time, so most of a
+reply is already on the phone when the user interrupts; stopping it locally is what makes interruption work.
+
+**Safety.** Microphone consent is a required checkbox. Audio is streamed only during the call and is never
+written to disk. Digit runs of 4+ (card numbers, codes) are masked before they reach the screen and redacted
+before the detector's classifier. The scammer prompt forbids reading digits back, real names, real numbers or
+links. The personas are fictional. Max 7 minutes per call, 3 calls per server, 2 per IP address.
+
+**Protocol.** Client → server: binary PCM16 16 kHz frames (100 ms) and JSON `start` (persona, consent), `played`,
+`detector` (scam check on/off), `clientMetric`, `end`. Server → client: binary PCM16 24 kHz and JSON `ready`,
+`state`, `vad`, `partial`, `line`, `turn`, `metrics`, `interrupted`, `rules`, `aiStart`, `ai`, `aiError`, `risk`,
+`notice`, `callerEnding`, `error`, `end` (with a summary).
 
 ## 3. Detection pipeline
 
@@ -134,6 +210,7 @@ It ships two ways: a web app with a Node.js API, and an Android app (React Nativ
 | GET / POST / DELETE | `/api/history`, `/api/history/:id` | Redacted analyses and call alert metadata |
 | POST | `/api/feedback` | `{id, verdict: correct|wrong}` |
 | GET | `/api/eval`, `/api/stats` | Evaluation results, history and feedback counts |
+| WebSocket | `/api/live` | Live AI call: PCM16 audio both ways + JSON events (section 2a); `/api/health` lists models and personas |
 
 ## 5. Security, privacy and reliability
 
@@ -167,10 +244,36 @@ and writes `eval/results.json`, which the Lab dashboard shows. Last run:
 AI latency p50 was about 1.5 s. This is a **development set**: the rules were tuned on it, so it is not an
 independent test.
 
+### Live AI call tests
+
+`node scripts/test-live.js [talk noise bargein silence hangup turn fallback]` acts as the phone against a running
+server: it streams recorded Azerbaijani speech (the Lab's victim clips, 16 kHz) in real time as the microphone,
+with silence between turns, waits for the caller's audio to "play" for its real duration, and records every
+event. Nothing is mocked; results go to `eval/live-results.json`. Runs on 8 November 2026 (free-tier key, laptop
+on Wi-Fi):
+
+| Case | What happened | Measured |
+|---|---|---|
+| `talk`: 5 user answers incl. an off-topic question and doubt | 6 caller turns, all on topic; asked for the card number, then the SMS code; detector danger from the first sentence | reply p50 1.07 s, p95 1.46 s; independent STT p50 1.7 s; detector AI p50 2.3 s |
+| `bargein`: user talks over the caller | caller stopped with 6.7 s of its reply unplayed; line marked as cut | reply 1.17 s |
+| `noise`: white noise at 3 % full scale all call | conversation continued; one answer misrecognised under the noise | reply p50 1.34 s, p95 1.73 s |
+| `silence`: user never speaks | "Alo? Məni eşidirsiniz?" at 9 s and 18 s, goodbye at 27 s, call ended by the caller | — |
+| `hangup`: user refuses three times, then goes quiet | caller pushed harder each time, then said goodbye and hung up itself (`end_call`) | reply p50 1.08 s |
+| `fallback`: Live model unavailable | session switched to the turn-based pipeline and said so | reply 9.1 s (STT 2.5 s, LLM 1.7 s, TTS 4.4 s) |
+| `turn`: turn-based pipeline | works, but slowly | reply up to 18 s (STT up to 6.1 s, LLM 2.1 s, TTS 4.3 s) |
+
+In the browser, the real client (WebAudio microphone, echo gate, player) measured **mouth to ear** (end of the
+user's speech to the first reply sample playing) at 1.13–1.29 s over four turns. Reply = end of the user's speech
+(last voiced frame, server VAD) to the first reply audio sent. The victim clips are synthetic voices; some were
+transcribed with Turkish spellings ("Niye yani" for "Necə yəni"), real voices may differ.
+
 ## 7. Limits and real-device path
 
 - Lab calls are simulated. Android does not let other apps read the audio of real phone calls, and this app does
   not claim to. The speech-to-text and AI analysis are real.
+- The live AI call is a real, unscripted voice conversation, but it runs inside the app over the internet, not
+  over the phone network. Turn-taking is VAD-based with barge-in, not full duplex. It needs the server and a
+  Gemini key with Live API access; free-tier quotas limit how many calls a day are possible.
 - A real Android product would capture call audio through the speakerphone with an Accessibility service (a short
   beep tells both sides), stream it to speech-to-text, and use the same rules and API. iOS does not allow call
   audio capture; there, the Check screen and a manual "protect this call" speaker mode are the realistic options.

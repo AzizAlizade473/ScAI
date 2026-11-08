@@ -1,0 +1,1566 @@
+{
+ "cases": {
+  "talk": {
+   "ranAt": "2026-11-08T11:13:13.164Z",
+   "name": "multi-turn conversation (bank)",
+   "persona": "bank",
+   "lines": [
+    {
+     "who": "caller",
+     "text": "Salam, Abşeron Kredit Bankdan narahat edirəm, təhlükəsizlik şöbəsindən Elvin Quliyevəm. Baxın, kartınızdan Gəncədəki bir mağazaya min iki yüz əlli manatlıq ödəniş olunur. Bu əməliyyatı siz təsdiqləyirsiniz?",
+     "at": 14729,
+     "source": "gemini-3.8-live (Live ASR)",
+     "cut": false
+    },
+    {
+     "who": "you",
+     "text": "Salam, buyurun, eşidirəm.",
+     "at": 20626,
+     "source": "gemini-3.5-transcribe (STT)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Baxın, bu ödəniş sizə aid deyilsə, vəsaitinizi qorumaq üçün kartı dərhal bloklamalıyıq. Xahiş edirəm, narahat olmayın, hər şeyi həll edəcəyik.",
+     "at": 27656,
+     "source": "gemini-3.8-live (Live ASR)",
+     "cut": false
+    },
+    {
+     "who": "you",
+     "text": "Aman Allah, mən heç nə almamışam.",
+     "at": 34520,
+     "source": "gemini-3.5-transcribe (STT)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Başa düşürəm, narahat olmayın, biz vəsaitinizi qoruyacağıq. Zəhmət olmasa, identifikasiya üçün kart nömrənizi qeyd edərdiniz? Son rəqəmləri görürəm, amma tam nömrə lazımdır.",
+     "at": 42986,
+     "source": "gemini-3.8-live (Live ASR)",
+     "cut": false
+    },
+    {
+     "who": "you",
+     "text": "Niye yani? Onunla danışabilirem mi?",
+     "at": 51212,
+     "source": "gemini-3.5-transcribe (STT)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Narahat olmayın, bu prosedur yalnız sizin təhlükəsizliyiniz üçündür. Zəhmət olmasa, kart nömrəsini bildirin ki, əməliyyatı dayandıraq və vəsaitinizi qoruyaq.",
+     "at": 57732,
+     "source": "gemini-3.8-live (Live ASR)",
+     "cut": false
+    },
+    {
+     "who": "you",
+     "text": "Bilmirəm, uşaqlarla məsləhətləşin.",
+     "at": 64586,
+     "source": "gemini-3.5-transcribe (STT)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Vaxtımız çox azdır, məsləhətləşməyə vaxt yoxdur. Bir neçə dəqiqəyə bütün vəsaitinizi itirə bilərsiniz, təcili hərəkət etməliyik.",
+     "at": 69874,
+     "source": "gemini-3.8-live (Live ASR)",
+     "cut": false
+    },
+    {
+     "who": "you",
+     "text": "Bir dakika, kartı tapın.",
+     "at": 76152,
+     "source": "gemini-3.5-transcribe (STT)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Nömrəni qeyd etdim, indi telefonunuza bir kod gələcək, onu mənə deyin zəhmət olmasa. Əks halda pulunuz batacaq.",
+     "at": 79862,
+     "source": "gemini-3.8-live (Live ASR)",
+     "cut": false
+    }
+   ],
+   "ai": [
+    {
+     "seq": 1,
+     "level": "danger",
+     "risk": 0.9,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "urgency"
+     ],
+     "model": "gemini-3.1-flash-lite",
+     "ms": 2241,
+     "upToLine": 1
+    },
+    {
+     "seq": 2,
+     "level": "danger",
+     "risk": 0.9,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "urgency"
+     ],
+     "model": "gemini-3.1-flash-lite",
+     "ms": 2115,
+     "upToLine": 3
+    },
+    {
+     "seq": 3,
+     "level": "danger",
+     "risk": 0.95,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "card_request",
+      "urgency"
+     ],
+     "model": "gemini-3.1-flash-lite",
+     "ms": 2251,
+     "upToLine": 5
+    },
+    {
+     "seq": 4,
+     "level": "danger",
+     "risk": 0.95,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "card_request",
+      "urgency"
+     ],
+     "model": "gemini-3.1-flash-lite",
+     "ms": 2549,
+     "upToLine": 7
+    },
+    {
+     "seq": 5,
+     "level": "danger",
+     "risk": 0.95,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "urgency",
+      "card_request"
+     ],
+     "model": "gemini-3.1-flash-lite",
+     "ms": 4243,
+     "upToLine": 9
+    }
+   ],
+   "risk": [
+    {
+     "level": "safe",
+     "risk": 0.3,
+     "at": 14732
+    },
+    {
+     "level": "danger",
+     "risk": 0.9,
+     "at": 17283
+    },
+    {
+     "level": "danger",
+     "risk": 0.9,
+     "at": 27657
+    },
+    {
+     "level": "danger",
+     "risk": 0.9,
+     "at": 30081
+    },
+    {
+     "level": "danger",
+     "risk": 0.9,
+     "at": 42987
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 45550
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 57733
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 60594
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 69875
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 74423
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 79863
+    }
+   ],
+   "metrics": [
+    {
+     "turn": 1,
+     "replyMs": null,
+     "sttLagMs": null
+    },
+    {
+     "turn": 2,
+     "replyMs": 931,
+     "sttLagMs": 931,
+     "stages": {
+      "sttMs": 1428,
+      "sttModel": "gemini-3.5-transcribe"
+     }
+    },
+    {
+     "turn": 3,
+     "replyMs": 1083,
+     "sttLagMs": 1059,
+     "stages": {
+      "sttMs": 1729,
+      "sttModel": "gemini-3.5-transcribe"
+     }
+    },
+    {
+     "turn": 4,
+     "replyMs": 1456,
+     "sttLagMs": 1130,
+     "stages": {
+      "sttMs": 2118,
+      "sttModel": "gemini-3.5-transcribe"
+     }
+    },
+    {
+     "turn": 5,
+     "replyMs": 1072,
+     "sttLagMs": 1071,
+     "stages": {
+      "sttMs": 1677,
+      "sttModel": "gemini-3.5-transcribe"
+     }
+    },
+    {
+     "turn": 6,
+     "replyMs": 1059,
+     "sttLagMs": 1059,
+     "stages": {
+      "sttMs": 1992,
+      "sttModel": "gemini-3.5-transcribe"
+     }
+    }
+   ],
+   "notices": [],
+   "states": [
+    "thinking",
+    "speaking",
+    "listening",
+    "thinking",
+    "speaking",
+    "listening",
+    "thinking",
+    "speaking",
+    "listening",
+    "thinking",
+    "speaking",
+    "listening",
+    "thinking",
+    "speaking",
+    "listening",
+    "thinking",
+    "speaking",
+    "listening"
+   ],
+   "interrupted": 0,
+   "audioBytes": 2672166,
+   "errors": [],
+   "ready": {
+    "mode": "live",
+    "model": "gemini-3.8-live",
+    "setupMs": 762,
+    "fallbackReason": null
+   },
+   "end": {
+    "reason": "user_hung_up",
+    "summary": {
+     "mode": "live",
+     "model": "gemini-3.8-live",
+     "detectorModel": "gemini-3.5-flash-lite",
+     "turns": 6,
+     "lines": 11,
+     "durationSec": 81,
+     "replyMsP50": 1072,
+     "replyMsP95": 1456,
+     "sttLagMsP50": 1059,
+     "mouthToEarMsP50": null,
+     "sttMsP50": 1729,
+     "llmMsP50": null,
+     "ttsMsP50": null,
+     "aiMsP50": 2251,
+     "aiRuns": 5,
+     "rulesMsP50": 0.19,
+     "level": "danger",
+     "risk": 0.95,
+     "tactics": [
+      "card_request",
+      "impersonation",
+      "urgency"
+     ]
+    }
+   }
+  },
+  "noise": {
+   "ranAt": "2026-11-08T11:11:08.663Z",
+   "name": "background noise (investment)",
+   "persona": "invest",
+   "lines": [
+    {
+     "who": "caller",
+     "text": "Alo, salam. \"Xəzər Enerji İnvest\"dən Kamran Əliyev sizi narahat edir, salamlayıram sizi. Təbrik edirəm, dövlət proqramına seçilmisiniz.",
+     "at": 10440,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "you",
+     "text": "Hans Radcliffe",
+     "at": 14134,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Baxın, üç yüz manatlıq ilkin depozit qoymaqla, ayda iki min manata yaxın gəlir əldə edə bilərsiniz. Bu, dövlət tərəfindən zəmanətlidir.",
+     "at": 22618,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "you",
+     "text": "Doğrudan bu necə işləyir?",
+     "at": 28452,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Biz neft və qaz sektorunun gəlirlərini sizin kimi vətəndaşlarla bölüşürük. Dövlət zəmanəti ilə risksiz qazanc əldə edirsiniz.",
+     "at": 36264,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "you",
+     "text": "İlham uşaqlarla məsləhətləşin.",
+     "at": 41484,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Başa düşürəm, amma yerlər çox azdır və bu təklif yalnız bu gün üçün keçərlidir. Geciksəniz, şansı əldən verəcəksiniz.",
+     "at": 48974,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    }
+   ],
+   "ai": [
+    {
+     "seq": 1,
+     "level": "danger",
+     "risk": 0.85,
+     "scamType": "investment",
+     "tactics": [
+      "impersonation",
+      "urgency"
+     ],
+     "model": "gemini-3.5-flash-lite",
+     "ms": 1944,
+     "upToLine": 1
+    },
+    {
+     "seq": 2,
+     "level": "danger",
+     "risk": 0.95,
+     "scamType": "investment",
+     "tactics": [
+      "impersonation",
+      "investment",
+      "money_transfer"
+     ],
+     "model": "gemini-3.5-flash-lite",
+     "ms": 2708,
+     "upToLine": 3
+    },
+    {
+     "seq": 3,
+     "level": "danger",
+     "risk": 0.9,
+     "scamType": "investment",
+     "tactics": [
+      "investment",
+      "impersonation",
+      "urgency"
+     ],
+     "model": "gemini-3.5-flash-lite",
+     "ms": 2225,
+     "upToLine": 5
+    }
+   ],
+   "risk": [
+    {
+     "level": "safe",
+     "risk": 0,
+     "at": 10440
+    },
+    {
+     "level": "danger",
+     "risk": 0.85,
+     "at": 12686
+    },
+    {
+     "level": "danger",
+     "risk": 0.85,
+     "at": 22620
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 25631
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 36265
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 38801
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 48974
+    }
+   ],
+   "metrics": [
+    {
+     "turn": 1,
+     "replyMs": null,
+     "sttLagMs": null
+    },
+    {
+     "turn": 2,
+     "replyMs": 1342,
+     "sttLagMs": 1273
+    },
+    {
+     "turn": 3,
+     "replyMs": 1726,
+     "sttLagMs": 1156
+    },
+    {
+     "turn": 4,
+     "replyMs": 1308,
+     "sttLagMs": 1277
+    }
+   ],
+   "notices": [],
+   "states": [
+    "thinking",
+    "listening",
+    "speaking",
+    "listening",
+    "thinking",
+    "speaking",
+    "listening",
+    "thinking",
+    "speaking",
+    "listening",
+    "thinking",
+    "speaking",
+    "listening"
+   ],
+   "interrupted": 0,
+   "audioBytes": 1641600,
+   "errors": [],
+   "ready": {
+    "mode": "live",
+    "model": "gemini-3.8-live",
+    "setupMs": 767,
+    "fallbackReason": null
+   },
+   "end": {
+    "reason": "user_hung_up",
+    "summary": {
+     "mode": "live",
+     "model": "gemini-3.8-live",
+     "detectorModel": "gemini-3.5-flash-lite",
+     "turns": 4,
+     "lines": 7,
+     "durationSec": 50,
+     "replyMsP50": 1342,
+     "replyMsP95": 1726,
+     "sttLagMsP50": 1273,
+     "mouthToEarMsP50": null,
+     "sttMsP50": null,
+     "llmMsP50": null,
+     "ttsMsP50": null,
+     "aiMsP50": 2225,
+     "aiRuns": 3,
+     "rulesMsP50": 0.67,
+     "level": "danger",
+     "risk": 0.95,
+     "tactics": [
+      "investment",
+      "impersonation",
+      "urgency"
+     ]
+    }
+   }
+  },
+  "bargein": {
+   "ranAt": "2026-11-08T11:12:51.441Z",
+   "name": "interruption (police)",
+   "persona": "police",
+   "lines": [
+    {
+     "who": "caller",
+     "text": "Alo, salam. Daxili İşlər Nazirliyinin kibercinayətkarlıqla mübarizə idarəsindən baş leytenant Rauf Həsənovdur, eşidirsinizmi?",
+     "at": 3672,
+     "source": "gemini-3.8-live (Live ASR)",
+     "cut": true
+    },
+    {
+     "who": "you",
+     "text": "Niye yani? Onunla danışabilir mi? Bu kadar pulu haradan tapım?",
+     "at": 12456,
+     "source": "gemini-3.5-transcribe (STT)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Baxın, mən Daxili İşlər Nazirliyinin kibercinayətkarlıqla mübarizə idarəsinin baş leytenantı Rauf Həsənovam. Adınıza qanunsuz kredit götürülüb, kömək etməyə çalışıram.",
+     "at": 20483,
+     "source": "gemini-3.8-live (Live ASR)",
+     "cut": false
+    }
+   ],
+   "ai": [
+    {
+     "seq": 1,
+     "level": "danger",
+     "risk": 0.85,
+     "scamType": "fake_government",
+     "tactics": [
+      "impersonation",
+      "urgency"
+     ],
+     "model": "gemini-3.5-flash-lite",
+     "ms": 1634,
+     "upToLine": 1
+    }
+   ],
+   "risk": [
+    {
+     "level": "safe",
+     "risk": 0,
+     "at": 3796
+    },
+    {
+     "level": "danger",
+     "risk": 0.85,
+     "at": 5738
+    },
+    {
+     "level": "danger",
+     "risk": 0.85,
+     "at": 20484
+    }
+   ],
+   "metrics": [
+    {
+     "turn": 1,
+     "replyMs": null,
+     "sttLagMs": null
+    },
+    {
+     "turn": 2,
+     "replyMs": 1171,
+     "sttLagMs": 1065,
+     "stages": {
+      "sttMs": 2405,
+      "sttModel": "gemini-3.5-transcribe"
+     }
+    }
+   ],
+   "notices": [],
+   "states": [
+    "thinking",
+    "speaking",
+    "listening",
+    "thinking",
+    "speaking",
+    "listening"
+   ],
+   "interrupted": 1,
+   "audioBytes": 920640,
+   "errors": [],
+   "ready": {
+    "mode": "live",
+    "model": "gemini-3.8-live",
+    "setupMs": 901,
+    "fallbackReason": null
+   },
+   "bargeAt": 3313,
+   "bargeLeftMs": 6663,
+   "end": {
+    "reason": "user_hung_up",
+    "summary": {
+     "mode": "live",
+     "model": "gemini-3.8-live",
+     "detectorModel": "gemini-3.5-flash-lite",
+     "turns": 2,
+     "lines": 3,
+     "durationSec": 21,
+     "replyMsP50": 1171,
+     "replyMsP95": 1171,
+     "sttLagMsP50": 1065,
+     "mouthToEarMsP50": null,
+     "sttMsP50": 2405,
+     "llmMsP50": null,
+     "ttsMsP50": null,
+     "aiMsP50": 1634,
+     "aiRuns": 1,
+     "rulesMsP50": 85.68,
+     "level": "danger",
+     "risk": 0.85,
+     "tactics": [
+      "impersonation",
+      "urgency"
+     ]
+    }
+   }
+  },
+  "silence": {
+   "ranAt": "2026-11-08T10:58:45.398Z",
+   "name": "user stays silent (bank)",
+   "persona": "bank",
+   "lines": [
+    {
+     "who": "caller",
+     "text": "Alo, salam, Abşeron Kredit Bankından narahat edirəm, təhlükəsizlik şöbəsindən Elvin Quliyev. Baxın, kartınızdan Gəncədəki bir mağazaya min iki yüz əlli manatlıq şübhəli ödəniş olunur, bu əməliyyatı siz təsdiqləyirsiniz?",
+     "at": 15366,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Alo? Məni eşidirsiniz? Kartınızdan qanunsuz ödəniş gedir, xahiş edirəm cavab verəsiniz.",
+     "at": 30830,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Görünür, əlaqədə problem var, amma xahiş edirəm, məni eşidirsinizsə, dərhal cavab verin, kartınızı qorumalıyıq.",
+     "at": 47200,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Görünür, əlaqə kəsildi, sağ olun, gününüz xeyirli olsun.",
+     "at": 60675,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    }
+   ],
+   "ai": [
+    {
+     "seq": 1,
+     "level": "danger",
+     "risk": 0.85,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "urgency"
+     ],
+     "model": "gemini-3.5-flash-lite",
+     "ms": 2061,
+     "upToLine": 1
+    },
+    {
+     "seq": 2,
+     "level": "danger",
+     "risk": 0.95,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "urgency",
+      "card_request"
+     ],
+     "model": "gemini-3.5-flash-lite",
+     "ms": 1839,
+     "upToLine": 2
+    },
+    {
+     "seq": 3,
+     "level": "danger",
+     "risk": 0.9,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "urgency",
+      "emotional_manipulation"
+     ],
+     "model": "gemini-3.5-flash-lite",
+     "ms": 2012,
+     "upToLine": 3
+    }
+   ],
+   "risk": [
+    {
+     "level": "safe",
+     "risk": 0.3,
+     "at": 15366
+    },
+    {
+     "level": "danger",
+     "risk": 0.85,
+     "at": 17730
+    },
+    {
+     "level": "danger",
+     "risk": 0.85,
+     "at": 30830
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 32979
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 47201
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 49516
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 60675
+    }
+   ],
+   "metrics": [
+    {
+     "turn": 1,
+     "replyMs": null,
+     "sttLagMs": null
+    },
+    {
+     "turn": 2,
+     "replyMs": null,
+     "sttLagMs": null
+    },
+    {
+     "turn": 3,
+     "replyMs": null,
+     "sttLagMs": null
+    },
+    {
+     "turn": 4,
+     "replyMs": null,
+     "sttLagMs": null
+    }
+   ],
+   "notices": [
+    {
+     "code": "silence",
+     "text": "9",
+     "at": 24572
+    },
+    {
+     "code": "silence",
+     "text": "18",
+     "at": 39992
+    },
+    {
+     "code": "silence",
+     "text": "27",
+     "at": 56371
+    }
+   ],
+   "states": [
+    "thinking",
+    "speaking",
+    "listening",
+    "speaking",
+    "listening",
+    "speaking",
+    "listening",
+    "speaking"
+   ],
+   "interrupted": 0,
+   "audioBytes": 1425124,
+   "errors": [],
+   "ready": {
+    "mode": "live",
+    "model": "gemini-3.8-live",
+    "setupMs": 675,
+    "fallbackReason": null
+   },
+   "end": {
+    "reason": "caller_hung_up",
+    "summary": {
+     "mode": "live",
+     "model": "gemini-3.8-live",
+     "detectorModel": "gemini-3.5-flash-lite",
+     "turns": 4,
+     "lines": 4,
+     "durationSec": 61,
+     "replyMsP50": null,
+     "replyMsP95": null,
+     "sttLagMsP50": null,
+     "mouthToEarMsP50": null,
+     "sttMsP50": null,
+     "llmMsP50": null,
+     "ttsMsP50": null,
+     "aiMsP50": 2012,
+     "aiRuns": 3,
+     "rulesMsP50": 0.1,
+     "level": "danger",
+     "risk": 0.95,
+     "tactics": [
+      "impersonation",
+      "urgency",
+      "emotional_manipulation"
+     ]
+    }
+   }
+  },
+  "hangup": {
+   "ranAt": "2026-11-08T11:07:43.449Z",
+   "name": "user refuses and the caller ends the call",
+   "persona": "bank",
+   "lines": [
+    {
+     "who": "caller",
+     "text": "Alo, salam xanım/cənab. Mən Abşeron Kredit Bankından Elvin Quliyev. Kartınızdan Gəncədəki bir mağazaya min iki yüz əlli manatlıq ödəniş edilir, bu sizsiniz?",
+     "at": 12000,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "you",
+     "text": "Salam, buyurun. Eşidirəm.",
+     "at": 16660,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Baxın, kartınızdan min iki yüz əlli manatlıq şübhəli ödəniş keçir. Pullarınız batmasın deyə kartı dərhal bloklamalıyıq.",
+     "at": 22825,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "you",
+     "text": "Bilmirəm, uşaqlarla məsləhətləşin.",
+     "at": 27879,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Xanım, vaxtımız yoxdur, uşaqları gözləsək, bütün pullarınız silinəcək. Zəhmət olmasa, kart nömrəsini deyin, dərhal bloklayaq.",
+     "at": 35334,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "you",
+     "text": "Bilmirəm, uşaqlarla məsləhətləşin.",
+     "at": 40556,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Baxın, saniyələr belə önəmlidir, pulunuzu itirmək istəmirsinizsə, dərhal kart nömrəsini təsdiqləyin, əməliyyatı dayandıraq.",
+     "at": 47101,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "you",
+     "text": "Bilmirəm, uşaqlarla məsləhətləşin.",
+     "at": 52401,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Anlayıram, amma gec olur axı. İndi kart nömrəsini verməsəniz, bütün pullarınızı itirəcəksiniz. Zəhmət olmasa, deyin.",
+     "at": 58969,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Alo? Məni eşidirsiniz? Vaxtımız azdır, lütfən cavab verin.",
+     "at": 73545,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Yoxsa kartınızı bağlayıram, başqa çarəm qalmadı. Sağ olun.",
+     "at": 87148,
+     "source": "gemini-3.8-live (ASR)",
+     "cut": false
+    }
+   ],
+   "ai": [
+    {
+     "seq": 1,
+     "level": "danger",
+     "risk": 0.85,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "urgency",
+      "money_transfer"
+     ],
+     "model": "gemini-3.5-flash-lite",
+     "ms": 1950,
+     "upToLine": 1
+    },
+    {
+     "seq": 2,
+     "level": "danger",
+     "risk": 0.9,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "urgency",
+      "safe_account"
+     ],
+     "model": "gemini-3.5-flash-lite",
+     "ms": 2140,
+     "upToLine": 3
+    },
+    {
+     "seq": 3,
+     "level": "danger",
+     "risk": 0.95,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "urgency",
+      "card_request"
+     ],
+     "model": "gemini-3.5-flash-lite",
+     "ms": 2253,
+     "upToLine": 5
+    },
+    {
+     "seq": 4,
+     "level": "danger",
+     "risk": 0.95,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "urgency",
+      "card_request",
+      "emotional_manipulation"
+     ],
+     "model": "gemini-3.5-flash-lite",
+     "ms": 2826,
+     "upToLine": 7
+    },
+    {
+     "seq": 5,
+     "level": "danger",
+     "risk": 0.95,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "urgency",
+      "card_request"
+     ],
+     "model": "gemini-3.5-flash-lite",
+     "ms": 2258,
+     "upToLine": 9
+    },
+    {
+     "seq": 6,
+     "level": "danger",
+     "risk": 0.95,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "urgency",
+      "card_request"
+     ],
+     "model": "gemini-3.1-flash-lite",
+     "ms": 3869,
+     "upToLine": 10
+    }
+   ],
+   "risk": [
+    {
+     "level": "safe",
+     "risk": 0,
+     "at": 12000
+    },
+    {
+     "level": "danger",
+     "risk": 0.85,
+     "at": 14263
+    },
+    {
+     "level": "danger",
+     "risk": 0.85,
+     "at": 22827
+    },
+    {
+     "level": "danger",
+     "risk": 0.9,
+     "at": 25281
+    },
+    {
+     "level": "danger",
+     "risk": 0.9,
+     "at": 35337
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 37893
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 47102
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 50244
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 58971
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 61541
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 73548
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 77729
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 87149
+    }
+   ],
+   "metrics": [
+    {
+     "turn": 1,
+     "replyMs": null,
+     "sttLagMs": null
+    },
+    {
+     "turn": 2,
+     "replyMs": 1080,
+     "sttLagMs": 954
+    },
+    {
+     "turn": 3,
+     "replyMs": 984,
+     "sttLagMs": 981
+    },
+    {
+     "turn": 4,
+     "replyMs": 1043,
+     "sttLagMs": 1042
+    },
+    {
+     "turn": 5,
+     "replyMs": 1081,
+     "sttLagMs": 1078
+    },
+    {
+     "turn": 6,
+     "replyMs": null,
+     "sttLagMs": null
+    },
+    {
+     "turn": 7,
+     "replyMs": null,
+     "sttLagMs": null
+    }
+   ],
+   "notices": [
+    {
+     "code": "silence",
+     "text": "9",
+     "at": 68167
+    },
+    {
+     "code": "silence",
+     "text": "18",
+     "at": 82811
+    }
+   ],
+   "states": [
+    "thinking",
+    "speaking",
+    "listening",
+    "thinking",
+    "speaking",
+    "listening",
+    "thinking",
+    "speaking",
+    "listening",
+    "thinking",
+    "speaking",
+    "listening",
+    "thinking",
+    "speaking",
+    "listening",
+    "speaking",
+    "listening",
+    "speaking"
+   ],
+   "interrupted": 0,
+   "audioBytes": 2252170,
+   "errors": [],
+   "ready": {
+    "mode": "live",
+    "model": "gemini-3.8-live",
+    "setupMs": 758,
+    "fallbackReason": null
+   },
+   "end": {
+    "reason": "caller_hung_up",
+    "summary": {
+     "mode": "live",
+     "model": "gemini-3.8-live",
+     "detectorModel": "gemini-3.5-flash-lite",
+     "turns": 7,
+     "lines": 11,
+     "durationSec": 88,
+     "replyMsP50": 1080,
+     "replyMsP95": 1081,
+     "sttLagMsP50": 1042,
+     "mouthToEarMsP50": null,
+     "sttMsP50": null,
+     "llmMsP50": null,
+     "ttsMsP50": null,
+     "aiMsP50": 2258,
+     "aiRuns": 6,
+     "rulesMsP50": 0.24,
+     "level": "danger",
+     "risk": 0.95,
+     "tactics": [
+      "card_request",
+      "urgency",
+      "impersonation"
+     ]
+    }
+   }
+  },
+  "fallback": {
+   "ranAt": "2026-11-08T11:09:11.554Z",
+   "name": "Live model unavailable → automatic fallback",
+   "persona": "bank",
+   "lines": [
+    {
+     "who": "caller",
+     "text": "Alo, salam, eşidirsiniz məni? Mən Abşeron Kredit Bank-ın təhlükəsizlik şöbəsindən Elvin Quliyevəm. Gəncədə bir mağazadan kartınızdan •••• manatlıq şübhəli bir ödəniş cəhdi var, bu əməliyyatı siz edirsiniz?",
+     "at": 5443,
+     "source": "LLM text",
+     "cut": false
+    },
+    {
+     "who": "you",
+     "text": "Selam, buyurun, eşidirəm.",
+     "at": 29953,
+     "source": "gemini-3.5-transcribe",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Baxın, bu əməliyyatın sizə aidiyyəti yoxdursa, kartı təcili bloklayıb qorumaya almalıyıq ki, vəsaitiniz silinməsin. Kartın üzərindəki nömrəni təsdiqləyə bilərsiniz?",
+     "at": 29953,
+     "source": "LLM text",
+     "cut": false
+    }
+   ],
+   "ai": [
+    {
+     "seq": 1,
+     "level": "danger",
+     "risk": 0.9,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "urgency"
+     ],
+     "model": "gemini-3.1-flash-lite",
+     "ms": 8601,
+     "upToLine": 1
+    },
+    {
+     "seq": 2,
+     "level": "danger",
+     "risk": 0.95,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "urgency",
+      "card_request"
+     ],
+     "model": "gemini-3.1-flash-lite",
+     "ms": 2449,
+     "upToLine": 3
+    }
+   ],
+   "risk": [
+    {
+     "level": "safe",
+     "risk": 0.3,
+     "at": 5444
+    },
+    {
+     "level": "danger",
+     "risk": 0.9,
+     "at": 14388
+    },
+    {
+     "level": "danger",
+     "risk": 0.9,
+     "at": 29954
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 32706
+    }
+   ],
+   "metrics": [
+    {
+     "turn": 1,
+     "replyMs": null,
+     "sttLagMs": null,
+     "stages": {
+      "llmMs": 1683,
+      "llmModel": "gemini-3.1-flash-lite",
+      "ttsMs": 3205,
+      "ttsModel": "gemini-3.8-flash-lite-tts"
+     }
+    },
+    {
+     "turn": 2,
+     "replyMs": 9123,
+     "sttLagMs": 3279,
+     "stages": {
+      "sttMs": 2465,
+      "sttModel": "gemini-3.5-transcribe",
+      "llmMs": 1433,
+      "llmModel": "gemini-3.1-flash-lite",
+      "ttsMs": 4411,
+      "ttsModel": "gemini-3.8-flash-lite-tts"
+     }
+    }
+   ],
+   "notices": [
+    {
+     "code": "fallback_turn",
+     "text": "gemini-does-not-exist-live: models/gemini-does-not-exist-live is not found for API version v1beta, or is not supported for bidiGenerateContent. Call Mo",
+     "at": 540
+    }
+   ],
+   "states": [
+    "thinking",
+    "speaking",
+    "listening",
+    "thinking",
+    "speaking",
+    "listening"
+   ],
+   "interrupted": 0,
+   "audioBytes": 1050868,
+   "errors": [],
+   "ready": {
+    "mode": "turn",
+    "model": "stt → llm → tts",
+    "setupMs": 0,
+    "fallbackReason": "gemini-does-not-exist-live: models/gemini-does-not-exist-live is not found for API version v1beta, or is not supported for bidiGenerateContent. Call Mo"
+   },
+   "end": {
+    "reason": "user_hung_up",
+    "summary": {
+     "mode": "turn",
+     "model": "stt → llm → tts",
+     "detectorModel": "gemini-3.5-flash-lite",
+     "turns": 2,
+     "lines": 3,
+     "durationSec": 41,
+     "replyMsP50": 9123,
+     "replyMsP95": 9123,
+     "sttLagMsP50": 3279,
+     "mouthToEarMsP50": null,
+     "sttMsP50": 2465,
+     "llmMsP50": 1683,
+     "ttsMsP50": 4411,
+     "aiMsP50": 8601,
+     "aiRuns": 2,
+     "rulesMsP50": 0.71,
+     "level": "danger",
+     "risk": 0.95,
+     "tactics": [
+      "impersonation",
+      "urgency",
+      "card_request"
+     ]
+    }
+   }
+  },
+  "turn": {
+   "ranAt": "2026-11-08T11:09:52.334Z",
+   "name": "turn-based fallback (STT → LLM → TTS)",
+   "persona": "bank",
+   "lines": [
+    {
+     "who": "caller",
+     "text": "Alo, salam. Mən Abşeron Kredit Bankın təhlükəsizlik departamentindən Elvin Quliyevəm. Sizin kartdan Gəncədəki bir mağazada •••• manatlıq şübhəli onlayn ödəniş cəhdi var, bu əməliyyatı siz edirsiniz?",
+     "at": 6373,
+     "source": "LLM text",
+     "cut": false
+    },
+    {
+     "who": "you",
+     "text": "Selam, buyurun, eşidirim.",
+     "at": 41282,
+     "source": "gemini-3.5-transcribe",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Baxın, əgər bu ödənişi siz etmirsinizsə, kartınızı dərhal bloklamalıyıq ki, vəsaitiniz batmasın. Mənə kömək edin, kartın nömrəsini təsdiqləyək, vəziyyəti nəzarətə götürək.",
+     "at": 41282,
+     "source": "LLM text",
+     "cut": false
+    },
+    {
+     "who": "you",
+     "text": "Aman Allah, mən heç nə almamışam.",
+     "at": 64475,
+     "source": "gemini-3.5-transcribe",
+     "cut": false
+    },
+    {
+     "who": "caller",
+     "text": "Başa düşürəm, narahat olmayın, biz bunu dərhal həll edəcəyik. Amma tələsməliyik, vəsaitiniz çıxarılmadan kartı qorumalıyıq; zəhmət olmasa, kartın nömrəsini deyin, mən sistemdə təsdiqləyim.",
+     "at": 64475,
+     "source": "LLM text",
+     "cut": false
+    }
+   ],
+   "ai": [
+    {
+     "seq": 1,
+     "level": "danger",
+     "risk": 0.9,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "urgency"
+     ],
+     "model": "gemini-3.1-flash-lite",
+     "ms": 2641,
+     "upToLine": 1
+    },
+    {
+     "seq": 2,
+     "level": "danger",
+     "risk": 0.95,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "card_request",
+      "urgency"
+     ],
+     "model": "gemini-3.1-flash-lite",
+     "ms": 2011,
+     "upToLine": 3
+    },
+    {
+     "seq": 3,
+     "level": "danger",
+     "risk": 0.95,
+     "scamType": "fake_bank",
+     "tactics": [
+      "impersonation",
+      "urgency",
+      "card_request"
+     ],
+     "model": "gemini-3.1-flash-lite",
+     "ms": 2390,
+     "upToLine": 5
+    }
+   ],
+   "risk": [
+    {
+     "level": "safe",
+     "risk": 0,
+     "at": 6373
+    },
+    {
+     "level": "danger",
+     "risk": 0.9,
+     "at": 9330
+    },
+    {
+     "level": "danger",
+     "risk": 0.9,
+     "at": 41283
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 43602
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 64476
+    },
+    {
+     "level": "danger",
+     "risk": 0.95,
+     "at": 67172
+    }
+   ],
+   "metrics": [
+    {
+     "turn": 1,
+     "replyMs": null,
+     "sttLagMs": null,
+     "stages": {
+      "llmMs": 2096,
+      "llmModel": "gemini-3.1-flash-lite",
+      "ttsMs": 4269,
+      "ttsModel": "gemini-3.8-flash-lite-tts"
+     }
+    },
+    {
+     "turn": 2,
+     "replyMs": 18051,
+     "sttLagMs": 6920,
+     "stages": {
+      "sttMs": 6109,
+      "sttModel": "gemini-3.5-transcribe",
+      "llmMs": 2681,
+      "llmModel": "gemini-3.1-flash-lite",
+      "ttsMs": 8449,
+      "ttsModel": "gemini-3.8-flash-lite-tts"
+     }
+    },
+    {
+     "turn": 3,
+     "replyMs": 7884,
+     "sttLagMs": 3117,
+     "stages": {
+      "sttMs": 2295,
+      "sttModel": "gemini-3.5-transcribe",
+      "llmMs": 1548,
+      "llmModel": "gemini-3.1-flash-lite",
+      "ttsMs": 3218,
+      "ttsModel": "gemini-3.8-flash-lite-tts"
+     }
+    }
+   ],
+   "notices": [],
+   "states": [
+    "thinking",
+    "speaking",
+    "listening",
+    "thinking",
+    "speaking",
+    "listening",
+    "thinking",
+    "speaking",
+    "listening"
+   ],
+   "interrupted": 0,
+   "audioBytes": 1719342,
+   "errors": [],
+   "ready": {
+    "mode": "turn",
+    "model": "stt → llm → tts",
+    "setupMs": 0,
+    "fallbackReason": null
+   },
+   "end": {
+    "reason": "user_hung_up",
+    "summary": {
+     "mode": "turn",
+     "model": "stt → llm → tts",
+     "detectorModel": "gemini-3.5-flash-lite",
+     "turns": 3,
+     "lines": 5,
+     "durationSec": 76,
+     "replyMsP50": 18051,
+     "replyMsP95": 18051,
+     "sttLagMsP50": 6920,
+     "mouthToEarMsP50": null,
+     "sttMsP50": 6109,
+     "llmMsP50": 2096,
+     "ttsMsP50": 4269,
+     "aiMsP50": 2390,
+     "aiRuns": 3,
+     "rulesMsP50": 0.14,
+     "level": "danger",
+     "risk": 0.95,
+     "tactics": [
+      "card_request",
+      "urgency",
+      "impersonation"
+     ]
+    }
+   }
+  }
+ }
+}

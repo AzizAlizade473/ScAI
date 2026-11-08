@@ -56,6 +56,15 @@ async function runCall(o) {
     else f = noiseFrame(o.noise || 0.002);
     ws.send(f);
   }, 100);
+  /* barge-in: talk over the caller ~1.5 s into its first reply while > 2 s of it is still to be played;
+   * like the app, stop the local playback at once */
+  const barge = o.bargeIn ? setInterval(() => {
+    const now = Date.now();
+    if (replyIdx === 0 && speakingSince && now - speakingSince > 1500 && playEnd - now > 2000 && !queue.length) {
+      replyIdx++; say(o.replies[0]); res.bargeAt = T(); res.bargeLeftMs = Math.round(playEnd - now); playEnd = now;
+      console.log(`         BARGE-IN with ${res.bargeLeftMs} ms of caller audio left`);
+    }
+  }, 100) : null;
   const nextReply = () => {
     if (o.hangUpAfter != null && replyIdx >= o.hangUpAfter) { setTimeout(() => { if (ws.readyState === 1) ws.send(JSON.stringify({ type: 'end' })); }, 800); return; }
     const r = (o.replies || [])[replyIdx++];
@@ -66,9 +75,6 @@ async function runCall(o) {
       const n = e.data.byteLength; res.audioBytes += n;
       const now = Date.now(); if (!speakingSince) speakingSince = now;
       playEnd = Math.max(playEnd, now) + n / 48;        /* 24 kHz PCM16 = 48 bytes per ms */
-      /* barge-in: talk over the caller ~1.5 s into its first reply, while >2 s of it is still to be played;
-       * like the app, stop the local playback at once */
-      if (o.bargeIn && replyIdx === 0 && now - speakingSince > 1500 && playEnd - now > 2000 && !queue.length) { replyIdx++; say(o.replies[0]); res.bargeAt = T(); res.bargeLeftMs = Math.round(playEnd - now); playEnd = now; console.log(`         BARGE-IN with ${res.bargeLeftMs} ms of caller audio left`); }
       return;
     }
     const m = JSON.parse(e.data); ev.push(Object.assign({ at: T() }, m));
@@ -92,7 +98,7 @@ async function runCall(o) {
   };
   const limit = Date.now() + (o.maxSec || 120) * 1000;
   while (!ended && ws.readyState <= 1 && Date.now() < limit) await sleep(200);
-  clearInterval(mic);
+  clearInterval(mic); if (barge) clearInterval(barge);
   if (!ended && ws.readyState === 1) { ws.send(JSON.stringify({ type: 'end' })); await sleep(800); }
   try { ws.close(); } catch { /* */ }
   res.end = ended ? { reason: ended.reason, summary: ended.summary } : { reason: 'test_timeout' };

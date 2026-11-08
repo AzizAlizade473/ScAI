@@ -7,11 +7,14 @@ with its evidence, a plain-language explanation and safe actions.
 - **Check:** paste an SMS, link or call text, or speak it. You get the risk, highlighted evidence, link analysis and what to do.
 - **Simulation Lab:** voiced scam and legitimate calls (Azerbaijani). The audio plays, is transcribed with **real
   speech-to-text**, and is analysed line by line, with an evidence timeline and an escalating warning.
+- **Live AI call:** an unscripted Azerbaijani voice conversation with an AI scammer (Gemini Live): it hears you,
+  answers what you say and can be interrupted, while Scam Guardian analyses the call independently and warns you.
 - **Judge mode:** your own text, a scenario you write, or your own consented voice recording. Everything is recomputed live, with scores, latency and model shown.
 - **Model quality:** precision / recall / F1 / latency measured on a labelled test set.
 
 > **Honesty note:** the calls are simulated. Android does not give other apps access to real call audio, and
-> Scam Guardian does not claim it. The speech-to-text and the AI analysis are real.
+> Scam Guardian does not claim it. The speech-to-text and the AI analysis are real, and the live AI call is a
+> real, unscripted conversation that runs inside the app, not over the phone network.
 
 ## Run it
 
@@ -28,6 +31,8 @@ recording needs `localhost` or HTTPS, so on a phone use the Check examples and t
 | `node server.js` | App + API on port 8787 |
 | `node eval/run.js` | Runs the labelled set through rules, Gemini and fusion → `eval/results.json` |
 | `node eval/run.js --rules` | Rules only, no API calls |
+| `node scripts/test-live.js` | End-to-end live AI call tests with real recorded speech → `eval/live-results.json` |
+| `mobile/node_modules/.bin/tsc -p live` | Type-checks the live call server modules (after `npm install` in `mobile/`) |
 | `node scripts/gen-voices.js` | Generates the Lab voices with Gemini TTS (skips existing clips) |
 
 The free Gemini tier has small per-model limits (some models allow 10–20 requests a day). The server rotates

@@ -24,7 +24,8 @@ type BridgeMessage =
   | { type: 'exit' }
   | { type: 'rec-start'; maxSec?: number }
   | { type: 'rec-stop' }
-  | { type: 'rec-cancel' };
+  | { type: 'rec-cancel' }
+  | { type: 'mic-permission' };
 
 /** Judge-mode voice recording: AAC (ADTS) mono 16 kHz — accepted by the server's /api/transcribe. */
 const RECORDING: RecordingOptions = {
@@ -127,9 +128,14 @@ export default function GuardianWebView() {
         case 'rec-cancel':
           stopRecording(true);
           break;
+        case 'mic-permission':   /* Live AI call: the page then opens the mic itself (getUserMedia in the WebView) */
+          AudioModule.requestRecordingPermissionsAsync()
+            .then(p => run(`window.SGNative.onMicPermission&&window.SGNative.onMicPermission(${p.granted ? 'true' : 'false'})`))
+            .catch(() => run('window.SGNative.onMicPermission&&window.SGNative.onMicPermission(false)'));
+          break;
       }
     },
-    [startRecording, stopRecording],
+    [startRecording, stopRecording, run],
   );
 
   /* Links to other sites (news sources) open in the browser; the app UI and the backend stay inside. */
@@ -184,6 +190,7 @@ export default function GuardianWebView() {
           allowFileAccessFromFileURLs
           allowUniversalAccessFromFileURLs
           mediaPlaybackRequiresUserAction={false}
+          mediaCapturePermissionGrantType="grant"
           mixedContentMode="always"
           setSupportMultipleWindows={false}
           overScrollMode="never"

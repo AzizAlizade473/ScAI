@@ -6,22 +6,13 @@
 const { EventEmitter } = require('events');
 const ScamCheck = require('../scam-check.js');
 const Personas = require('./personas');
-const { EnergyVad } = require('./vad');
+const { EnergyVad, pcmToWav: wav } = require('./vad');
 
 const REPLY_SCHEMA = {
   type: 'object',
   properties: { say: { type: 'string', description: 'what you say now, Azerbaijani' }, end_call: { type: 'boolean', description: 'true after your goodbye' } },
   required: ['say', 'end_call']
 };
-
-/** @param {Buffer} pcm @param {number} rate */
-function wav(pcm, rate) {
-  const h = Buffer.alloc(44);
-  h.write('RIFF', 0); h.writeUInt32LE(36 + pcm.length, 4); h.write('WAVE', 8); h.write('fmt ', 12);
-  h.writeUInt32LE(16, 16); h.writeUInt16LE(1, 20); h.writeUInt16LE(1, 22); h.writeUInt32LE(rate, 24);
-  h.writeUInt32LE(rate * 2, 28); h.writeUInt16LE(2, 32); h.writeUInt16LE(16, 34); h.write('data', 36); h.writeUInt32LE(pcm.length, 40);
-  return Buffer.concat([h, pcm]);
-}
 
 class TurnScammer extends EventEmitter {
   /**
