@@ -177,6 +177,35 @@ links. The personas are fictional. Max 7 minutes per call, 3 calls per server, 2
 `state`, `vad`, `partial`, `line`, `turn`, `metrics`, `interrupted`, `rules`, `aiStart`, `ai`, `aiError`, `risk`,
 `notice`, `callerEnding`, `error`, `end` (with a summary).
 
+## 2b. Two-phone call
+
+```
+ Phone A (caller) ◄──── WebRTC audio, peer to peer on the hotspot ────► Phone B (protected)
+        │                (Chromium WebRTC in the WebView: AEC, NS, AGC)        │
+        │ signalling only                                                      │ signalling + two analysis tracks:
+        ▼                                                                      ▼ [1] caller audio as received
+                         server.js  WebSocket /api/call  (live/call-room.js)     [2] B's own microphone
+                         rooms: 4-digit code, per-phone token, consent from both, 30 min TTL
+                         CallAnalyzer per room: streaming STT per speaker (gemini-3.5-transcribe-live;
+                         per-segment gemini-3.5-transcribe as fallback) → lines with speaker, times, session
+                         → ThreatDetector (rules.js + Gemini) → RiskAggregator → events to phone B only
+```
+
+- **Why not LiveKit.** It needs a LiveKit server (cloud account or a self-hosted binary), native modules
+  rebuilt for Expo SDK 58, and a native Node SDK for the audio worker. The WebView already contains Chromium's
+  WebRTC stack with echo cancellation, noise suppression and gain control, so two phones on one hotspot can talk
+  peer to peer with no new native code. The server is only used for signalling and analysis.
+- **Speakers are never mixed.** Each track has its own transcription stream and its own lines.
+- **The caller cannot feed the detector.** The server analyses the audio that phone B actually received;
+  phone A sends no transcripts, verdicts or analysis audio.
+- **Network.** The voice needs the phones to reach each other on the hotspot; signalling needs the laptop server;
+  the transcription and AI need internet on the hotspot. Without internet the call still works, without analysis.
+- **Measured** with two clients and recorded Azerbaijani speech (8 November 2026): voice connected 140–610 ms after
+  answering in the browser and 8.4 s on the Android emulator; the final transcript arrived about 1.5 s after the
+  speaker stopped; AI verdict p50 2.3–2.4 s; first warning 3.9 s after the caller's words on the emulator.
+  A scam call (card number, SMS code, secrecy) reached danger with the warning; a real-bank call stayed safe.
+  Not yet tested on two physical phones.
+
 ## 3. Detection pipeline
 
 1. **Rules (`rules.js`, under 5 ms).** Regular expressions for 11 tactics in AZ / RU / EN: OTP / PIN request,

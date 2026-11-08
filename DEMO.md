@@ -42,3 +42,20 @@ Android app (a phone *browser* only allows the microphone over HTTPS).
 If Gemini Live is unavailable, the app says so and switches to the slower turn-based pipeline (STT → LLM → TTS,
 replies take several seconds). Without the server the live call is not offered; the Lab simulations and the
 rules keep working.
+
+## Two-phone call (real conversation between two teammates)
+
+Needs: the laptop server running (`HOST=0.0.0.0 node server.js`), the laptop and both phones on the same
+hotspot, both phones with the same APK, and internet on the hotspot for Gemini.
+
+1. Both phones: **Laboratoriya → Komanda yoldaşına zəng (2 telefon)**, tick the consent box.
+2. Phone A (plays the scammer): **A: Zəng edən** → a 4-digit code appears.
+3. Phone B (the protected person): type the code → **B: Qəbul edən**. Phone A shows "Qoşuldu: B".
+4. Phone A: **Zəng et**. Phone B rings with the normal incoming-call screen; answer.
+5. Talk freely. Phone B shows the caller's real words, the evidence chips, the risk bar and the warning card
+   when the caller asks for a card number or an SMS code. Phone A only shows the call.
+6. For a fair comparison, make a second call as a real bank: confirm a payment and remind B never to share codes.
+   It should stay "Təhlükəsiz".
+
+Voice goes phone to phone (WebRTC). Phone B sends the caller's audio as it received it, and its own microphone,
+as two separate streams to the server, which transcribes and analyses them. Phone A sends nothing for analysis.
