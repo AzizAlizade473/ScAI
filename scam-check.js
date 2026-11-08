@@ -175,7 +175,8 @@
   /* A mid-call check must answer fast. If a model is overloaded (429/5xx) or slow, try the next
    * one and skip the busy model for 2 minutes. `model` may be a comma-separated list. */
   /* Free-tier quotas are per model (some only 20 requests/day), so the chain spans models with separate quotas. */
-  const FALLBACK_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-2.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-2.5-flash', 'gemma-4-31b-it'];
+  /* 2.5 models are retired for new keys ("no longer available to new users", 8 Nov 2026) */
+  const FALLBACK_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.8-flash', 'gemma-4-31b-it'];
   const cooldown = new Map();
   async function withFallback(models, fn) {
     const now = Date.now();
@@ -204,7 +205,7 @@
   }
 
   /* ---------- speech: real speech-to-text and text-to-speech (server side) ---------- */
-  const STT_MODELS = ['gemini-3.5-transcribe', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-2.5-flash-lite', 'gemini-2.5-flash'];
+  const STT_MODELS = ['gemini-3.5-transcribe', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.8-flash'];
   async function transcribe(opts) {
     const t0 = Date.now();
     const out = await withFallback(modelList(opts.model, STT_MODELS), async model => {

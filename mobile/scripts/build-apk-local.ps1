@@ -40,7 +40,7 @@ if (-not $Resume) {
   robocopy (Join-Path $repo 'mobile') $build /MIR /NFL /NDL /NJH /NJS /NP /XD node_modules android .cxx .expo dist web /XF .env *.apk | Out-Null
   if ($LASTEXITCODE -ge 8) { throw "robocopy failed ($LASTEXITCODE)" }
   New-Item -ItemType Directory -Force $web | Out-Null
-  foreach ($f in 'index.html', 'lab.css', 'lab.js', 'rules.js', 'scenarios.js', 'scam-check.js', 'live.js') {
+  foreach ($f in 'index.html', 'lab.css', 'lab.js', 'rules.js', 'scenarios.js', 'scam-check.js', 'live.js', 'call.js') {
     Copy-Item (Join-Path $repo $f) (Join-Path $web $f) -Force
   }
   robocopy (Join-Path $repo 'audio') (Join-Path $web 'audio') /MIR /NFL /NDL /NJH /NJS /NP | Out-Null

@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const { withDangerousMod } = require('expo/config-plugins');
 
-const FILES = ['index.html', 'lab.css', 'lab.js', 'rules.js', 'scenarios.js', 'scam-check.js', 'live.js'];
+const FILES = ['index.html', 'lab.css', 'lab.js', 'rules.js', 'scenarios.js', 'scam-check.js', 'live.js', 'call.js'];
 const DIRS = ['audio'];
 
 function copyDir(src, dst) {

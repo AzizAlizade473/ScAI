@@ -10,5 +10,5 @@
     "typeRoots": ["../mobile/node_modules/@types"],
     "skipLibCheck": true
   },
-  "files": ["session.js", "types.js"]
+  "files": ["session.js", "types.js", "call-room.js", "stt-stream.js"]
 }

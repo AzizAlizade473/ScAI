@@ -17,6 +17,7 @@ const LiveWs = require('./live/ws.js');
 const { LiveCallSession, MAX_SESSIONS } = require('./live/session.js');
 const { LIVE_MODELS, liveStatus } = require('./live/scammer-live.js');
 const Personas = require('./live/personas.js');
+const { handleCallConnection, roomCount } = require('./live/call-room.js');
 
 const ROOT = __dirname;
 loadEnv();
@@ -49,7 +50,7 @@ function cacheSet(kind, key, value) {
 const sha1 = x => crypto.createHash('sha1').update(x).digest('hex');
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.wav': 'audio/wav', '.md': 'text/plain; charset=utf-8' };
-const PUBLIC = new Set(['/index.html', '/scam-check.js', '/rules.js', '/lab.js', '/lab.css', '/scenarios.js', '/live.js']);
+const PUBLIC = new Set(['/index.html', '/scam-check.js', '/rules.js', '/lab.js', '/lab.css', '/scenarios.js', '/live.js', '/call.js']);
 const PUBLIC_DIRS = [/^\/audio\/[a-z0-9_-]+(?:\/[a-z0-9_-]+)?\.wav$/];
 
 function loadEnv() {
@@ -178,7 +179,8 @@ const server = http.createServer(async (req, res) => {
       try { history = (await store.stats()).total; } catch (e) { console.error('[store]', e.message); }
       return send(res, 200, {
         gemini: Boolean(KEY), model: MODEL, fallbacks: ScamCheck.FALLBACK_MODELS, stt: STT_MODEL, tts: TTS_MODEL, store: history !== null, db: store.kind === 'mysql' ? 'mysql' : 'json', history, cooling: ScamCheck.status(),
-        live: { available: Boolean(KEY), path: '/api/live', models: LIVE_MODELS, fallback: 'stt → llm → tts', detector: MODEL, personas: Personas.publicList(), active: LiveCallSession.activeCount(), max: MAX_SESSIONS, cooling: liveStatus() }
+        live: { available: Boolean(KEY), path: '/api/live', models: LIVE_MODELS, fallback: 'stt → llm → tts', detector: MODEL, personas: Personas.publicList(), active: LiveCallSession.activeCount(), max: MAX_SESSIONS, cooling: liveStatus() },
+        call: { path: '/api/call', rooms: roomCount(), ai: Boolean(KEY) }
       });
     }
     if (req.method === 'POST' && p === '/api/classify') {            // live call transcript → AI verdict
@@ -291,11 +293,16 @@ const server = http.createServer(async (req, res) => {
 const liveByIp = new Map();
 server.on('upgrade', (req, socket) => {
   const url = new URL(req.url || '/', 'http://localhost');
-  if (url.pathname !== '/api/live') return LiveWs.reject(socket, 404, 'Not Found');
+  if (url.pathname !== '/api/live' && url.pathname !== '/api/call') return LiveWs.reject(socket, 404, 'Not Found');
   const o = req.headers.origin;
   if (o && o !== 'null' && o !== 'file://') {
     let ok = false; try { ok = new URL(o).host === req.headers.host; } catch { /* */ }
     if (!ok) return LiveWs.reject(socket, 403, 'Cross-origin request refused');
+  }
+  if (url.pathname === '/api/call') {                      /* two-phone call: signalling + independent analysis */
+    const conn = LiveWs.accept(req, socket, { maxPayload: 256 * 1024 });
+    if (conn) handleCallConnection(conn, { apiKey: KEY, baseUrl: BASE, detectorModel: MODEL, log: s => console.log(s) });
+    return;
   }
   if (!KEY) return LiveWs.reject(socket, 503, 'GEMINI_API_KEY is not set on the server');
   const ip = req.socket.remoteAddress || '?';

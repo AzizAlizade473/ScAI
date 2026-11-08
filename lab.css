@@ -177,3 +177,6 @@ pre.redacted{margin:0;white-space:pre-wrap;word-break:break-word;font:12.5px/1.4
 .db-bars .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--outline);border-radius:5px}
 .db-bars .bar i.s{background:#E46962}
 .db-chip.lvl-danger{background:rgba(242,139,130,.16);color:#F28B82}
+
+/* ---------- Two-phone call ---------- */
+.pp-code{font-size:40px;font-weight:800;letter-spacing:10px;font-variant-numeric:tabular-nums;color:var(--text);margin:8px 0 2px}
