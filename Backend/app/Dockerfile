@@ -5,7 +5,8 @@ FROM node:22-alpine
 WORKDIR /app
 COPY Backend/package.json Backend/package-lock.json ./Backend/
 RUN cd Backend && npm ci --omit=dev --no-audit --no-fund
-COPY server.js store.js rules.js scam-check.js scenarios.js index.html lab.js lab.css ./
+COPY server.js store.js rules.js scam-check.js scenarios.js index.html lab.js lab.css live.js ./
+COPY live ./live
 COPY audio ./audio
 COPY eval/results.json ./eval/results.json
 COPY Backend/app ./Backend/app
