@@ -311,7 +311,7 @@ class LiveCall {
     if (this.ended) return;
     this.ended = true;
     clearInterval(this.tick);
-    if (notify) this._send({ type: 'end' });
+    if (notify) this._send({ type: 'end', why: String(new Error().stack || '').split('\n').slice(2, 7).map(s => s.trim()).join(' < ').slice(0, 500) });   /* which code path ended the call (server debug log) */
     try { this.ws && this.ws.close(); } catch (e) {}
     try { this.player.flush(); } catch (e) {}
     try { this.mic && this.mic.close(); } catch (e) {}

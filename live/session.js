@@ -91,7 +91,7 @@ class LiveCallSession {
   /** @param {string} s */
   setState(s) { if (s !== this.state) { this.state = s; this.send({ type: 'state', state: s, t: this.now() }); } }
   /** @param {string} code @param {string} text */
-  notice(code, text) { this.send({ type: 'notice', code, text, t: this.now() }); }
+  notice(code, text) { if (process.env.SG_LIVE_DEBUG) console.log(`[live] ${this.id} notice ${code} ${text}`); this.send({ type: 'notice', code, text, t: this.now() }); }
 
   /** @param {string} s */
   _onText(s) {
@@ -102,7 +102,7 @@ class LiveCallSession {
     else if (m.type === 'played') this._played();
     else if (m.type === 'detector' && this.detector) { this.detector.setEnabled(!!m.on); this.send({ type: 'detectorState', on: !!m.on }); }
     else if (m.type === 'clientMetric' && this.clientMetrics.length < 50) this.clientMetrics.push({ turn: m.turn | 0, mouthToEarMs: Math.max(0, Math.min(60000, +m.mouthToEarMs || 0)) });
-    else if (m.type === 'end') this.finish('user_hung_up');
+    else if (m.type === 'end') { if (process.env.SG_LIVE_DEBUG) console.log(`[live] ${this.id} client end: ${String(m.why || '').slice(0, 500)}`); this.finish('user_hung_up'); }
   }
 
   /** @param {any} m */
@@ -331,6 +331,7 @@ class LiveCallSession {
     /** @type {import('./types').TranscriptLine} */
     const line = { id: this.lines.length + 1, who, text: maskDigits(text), at: this.now(), source, cut };
     this.lines.push(line);
+    if (process.env.SG_LIVE_DEBUG) console.log(`[live] ${this.id} ${(line.at / 1000).toFixed(1)}s ${who === "you" ? "USER  " : "CALLER"} ${line.text}`);   /* local debugging only */
     this.send(Object.assign({ type: 'line' }, line));
     if (this.detector) this.detector.addLine(line);
   }
@@ -354,7 +355,7 @@ class LiveCallSession {
   /** @param {string} reason @param {boolean} [notify] */
   finish(reason, notify = true) {
     if (this.ended) return;
-    this.ended = true;
+    this.ended = true; this.endReason = reason;
     this._clearSilence();
     if (this.inTimer) clearTimeout(this.inTimer);
     this._finishCallerLine(false);
