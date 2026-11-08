@@ -1700,8 +1700,8 @@ function render(focus){
   });
   renderNav();renderSheet();updatePanel();
   const dark=state.theme==='dark'||['call','incoming','ended','danger'].includes(state.screen);
-  const th=(dark?'dark':'light')+':'+getComputedStyle(app).backgroundColor;
-  if(SGN.on&&th!==lastTheme){lastTheme=th;SGN.send({type:'theme',dark,bg:getComputedStyle(app).backgroundColor})}
+  /* the app background animates for .3s: report the final colour to the native status bar */
+  if(SGN.on){clearTimeout(render.themeT);render.themeT=setTimeout(()=>{const bg=getComputedStyle(app).backgroundColor,k=dark+bg;if(k!==lastTheme){lastTheme=k;SGN.send({type:'theme',dark,bg})}},400)}
   if(focus){const h=$(`.screen[data-screen="${state.screen}"] [data-focus]`);h&&h.focus({preventScroll:true})}
   const tl=$('#trList');if(tl)tl.scrollTop=tl.scrollHeight;
 }
@@ -1786,7 +1786,7 @@ function beginListening(){
 }
 /* Scripted demo line with a word-by-word "streaming STT" effect */
 function nextLine(){
-  const c=state.call;if(!c||c.scriptIdx>=c.script.lines.length||c.typing>=0||c.playing)return;
+  const c=state.call;if(!c||c.scriptIdx>=c.script.lines.length||c.playing||(c.typing>=0&&!c.script.lab))return;
   /* voiced Lab line: the audio always plays; speech-to-text and analysis run only while scam check is on */
   if(c.script.lines[c.scriptIdx].audio&&window.labLine){labLine(c,c.scriptIdx++);return}
   if(c.phase!=='listening')return;
@@ -1858,7 +1858,7 @@ function scheduleAI(){
 async function runAI(){
   const c=state.call;if(!c)return;
   const id=++c.ai.req;c.ai.status='checking';refreshLive();
-  const transcript=c.lines.filter((l,i)=>i!==c.typing).slice(-14).map(l=>({who:l.who,text:lineText(l)}));
+  const transcript=c.lines.filter((l,i)=>i!==c.typing&&lineText(l)).slice(-14).map(l=>({who:l.who,text:lineText(l)}));
   const signals={reports:callee().reports,knownContact:!!callee().name,smsCodeArrived:!!c.smsArrived};
   showSent(transcript,signals);setPipe([6],['db','llm']);
   try{

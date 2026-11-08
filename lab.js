@@ -162,16 +162,24 @@ async function api(path, o = {}) {
   if (!HAS_SERVER()) throw new Error(t('err.noServer'));
   const headers = Object.assign(o.json ? { 'Content-Type': 'application/json' } : {}, o.headers || {});
   let r;
-  try { r = await fetch(API_BASE() + path, { method: o.method || 'GET', headers, body: o.json ? JSON.stringify(o.json) : o.body }); }
+  /* every call has a timeout: an unreachable server must never hang the app */
+  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), o.timeoutMs || 20000);
+  try { r = await fetch(API_BASE() + path, { method: o.method || 'GET', headers, body: o.json ? JSON.stringify(o.json) : o.body, signal: ctl.signal }); }
   catch (e) { throw new Error(t('err.noServer')); }
+  finally { clearTimeout(timer); }
   const ct = r.headers.get('content-type') || '';
   const data = ct.includes('json') ? await r.json().catch(() => ({})) : await r.blob();
   if (!r.ok) throw Object.assign(new Error((data && data.error) || 'HTTP ' + r.status), { status: r.status });
   return data;
 }
 window.SGapi = api;
-async function loadHealth() { try { state.health = await api('/api/health'); } catch (e) { state.health = { gemini: false, error: e.message }; } if (state.screen === 'home' && SGN.on) render(); }
+async function loadHealth() { try { state.health = await api('/api/health', { timeoutMs: 5000 }); } catch (e) { state.health = { gemini: false, error: e.message }; } if (state.screen === 'home' && SGN.on) render(); }
 loadHealth();
+/* if the AI server comes up after the app was opened (or the address is fixed in Settings), notice it */
+setInterval(() => {
+  if (state.health && state.health.gemini) return;
+  loadHealth().then(() => { if (state.health && state.health.gemini) { detectAI(); if (['home', 'settings', 'lab'].includes(state.screen)) render(); } });
+}, 15000);
 
 const L = () => state.lang;
 const tacticLabel = tc => (ScamRules.TACTICS[tc] ? ScamRules.TACTICS[tc].label[L()] : t('tac.' + tc) !== 'tac.' + tc ? t('tac.' + tc) : tc);
@@ -408,17 +416,24 @@ window.labLine = function (c, k) {
   c.lines.push(l); const i = c.lines.length - 1; c.playing = true;
   if (k === c.script.sms && !c.smsArrived) { c.smsArrived = true; log('Signal: SMS code arrived during the call'); vibrate(60); }
   if (analyse) {
-    c.typing = i;
     const lis = $('#listening'); if (lis) lis.insertAdjacentHTML('beforebegin', lineHTML(l, i, false));
     const tl = $('#trList'); if (tl) tl.scrollTop = tl.scrollHeight;
     setPipe([2, 3, 4], ['stt']); flash(4);
   }
+  /* The conversation is paced by the audio only: the next speaker starts when this clip ends.
+   * Speech-to-text and analysis of this line catch up in the background, so a slow or unreachable
+   * server never stalls the call or silences the next speaker. */
   let audioDone = false, textDone = !analyse;
-  const next = () => {
-    if (!(audioDone && textDone) || state.call !== c || !c.playing) return;
+  const last = k === c.script.lines.length - 1;
+  const advance = () => {
+    if (!audioDone || state.call !== c || !c.playing) return;
     c.playing = false;
-    if (c.scriptIdx < c.script.lines.length) { labLater(c, nextLine, 450); return; }
-    /* 90-second demo: when a call finishes without an alert, hang up and ring the next scenario */
+    if (c.scriptIdx < c.script.lines.length) { labLater(c, nextLine, 500); return; }
+    endOfScript();
+  };
+  const endOfScript = () => {
+    /* 90-second demo: when the last line is analysed and there was no alert, hang up and ring the next scenario */
+    if (!textDone) { labLater(c, endOfScript, 400); return; }
     if (state.lab.demo && c.level !== 'danger') labLater(c, () => {
       hangUp();
       const nx = (state.lab.queue || []).shift();
@@ -427,34 +442,38 @@ window.labLine = function (c, k) {
   };
   const finishText = () => {
     if (state.call !== c) return;
-    if (c.phase !== 'listening' || l.stt === 'off') {           /* scam check was switched off meanwhile */
-      if (c.typing === i) c.typing = -1;
-      if (l.stt === 'wait') l.stt = 'off';
-      textDone = true; next(); return;
-    }
+    if (c.phase !== 'listening' || l.stt === 'off') { if (l.stt === 'wait') l.stt = 'off'; textDone = true; return; }   /* scam check switched off meanwhile */
     (c.timeline = c.timeline || []).push({ t: c.sec, kind: 'stt', text: l.text, meta: l.stt === 'ok' ? `${l.sttModel} · ${ms(l.sttMs)}${l.sttCached ? ' · ' + t('stt.cached') : ''}` : t('stt.fallback') });
     if (l.stt === 'ok') c.sttCount = (c.sttCount || 0) + 1, c.sttMsSum = (c.sttMsSum || 0) + l.sttMs;
-    typeLine(c, i, () => { if (c.phase === 'listening') lineDone(i); else if (c.typing === i) c.typing = -1; textDone = true; next(); });
+    typeLine(c, i, () => { if (c.phase === 'listening') lineDone(i); textDone = true; });
   };
   const t0 = performance.now();
+  const plays = (window.__labPlays = window.__labPlays || []);
   getBlob(src.audio).then(blob => {
     if (state.call !== c) return;
     const url = URL.createObjectURL(blob), a = new Audio(url);
     labAudio = a;                                                /* Mute is the user's microphone; the caller stays audible */
-    const done = () => { if (audioDone) return; audioDone = true; URL.revokeObjectURL(url); if (labAudio === a) labAudio = null; next(); };
+    const rec = { scenario: c.script.id, line: k, who: src.who, play: 'pending', ended: false };
+    plays.push(rec); if (plays.length > 60) plays.shift();
+    const done = ev => { if (audioDone) return; audioDone = true; rec.ended = ev && ev.type === 'ended'; URL.revokeObjectURL(url); if (labAudio === a) labAudio = null; advance(); };
     a.onended = done; a.onerror = done;
-    a.play().catch(done);
+    a.play().then(() => { rec.play = 'ok'; }, e => { rec.play = e.name; log(`Lab audio line ${k} (${src.who}) could not play: ${e.name}`); done(); });
     if (!analyse) return;
-    api('/api/transcribe' + (state.judge ? '?fresh=1' : ''), { method: 'POST', body: blob, headers: { 'Content-Type': 'audio/wav' } })
+    if (!(state.health && state.health.gemini)) {               /* no AI server: show the script text, labelled */
+      Object.assign(l, { text: src.ref, stt: 'fallback', sttErr: 'server' }); finishText(); return;
+    }
+    api('/api/transcribe' + (state.judge ? '?fresh=1' : ''), { method: 'POST', body: blob, headers: { 'Content-Type': 'audio/wav' }, timeoutMs: 15000 })
       .then(out => { if (!out.text) throw new Error('empty'); Object.assign(l, { text: out.text, stt: 'ok', sttModel: out.model, sttMs: out.ms || Math.round(performance.now() - t0), sttCached: !!out.cached }); })
       .catch(err => { Object.assign(l, { text: src.ref, stt: 'fallback', sttErr: err.message }); log('STT unavailable: ' + err.message); })
       .finally(finishText);
   }).catch(err => {                                                 /* clip missing: show the script text, labelled */
     log('Lab audio unavailable: ' + err.message);
+    plays.push({ scenario: c.script.id, line: k, who: src.who, play: 'missing' });
     Object.assign(l, { text: src.ref, stt: analyse ? 'fallback' : 'off' });
-    setTimeout(() => { audioDone = true; next(); }, 1200 + src.ref.split(' ').length * 260);
+    setTimeout(() => { audioDone = true; advance(); }, 1200 + src.ref.split(' ').length * 260);
     if (analyse) finishText();
   });
+  void last;
 };
 function typeLine(c, i, done) {
   const l = c.lines[i], li = $(`#trList .line[data-i="${i}"]`);

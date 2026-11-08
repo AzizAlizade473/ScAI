@@ -59,7 +59,7 @@ and puts it in the repository root as `ScamGuardian.apk`. First build: about 25 
 after a small change (about 4 minutes). Install it on a phone with USB debugging: `adb install -r ScamGuardian.apk`,
 or copy the file to the phone and open it (allow "Install unknown apps").
 
-The default AI server in the APK is `http://192.168.120.129:8787`. Override it with `EXPO_PUBLIC_API_URL`
+The default AI server in the APK is the build PC's Wi-Fi address at build time (last build: `http://172.20.10.2:8787`). Override it with `EXPO_PUBLIC_API_URL`
 before building, or change it in the app (Ayarlar → Server ünvanı).
 
 ## 3. Build an installable APK (EAS)
