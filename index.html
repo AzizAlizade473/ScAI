@@ -1408,6 +1408,7 @@ R.home=()=>{
       <input id="dlSearch" type="search" placeholder="${t('dl.search')}" aria-label="${t('dl.search')}" value="${esc(state.dlq)}" autocomplete="off">
       <button class="icb" data-action="voiceSearch" aria-label="${t('dl.voice')}">${ic('mic')}</button></div>
     <div class="chips" role="group" aria-label="Filter">${['all','missed','contacts','nonspam','spam'].map(k=>`<button class="fchip" data-action="chip" data-k="${k}" aria-pressed="${state.chip===k}">${t('chip.'+k)}</button>`).join('')}</div>
+    ${SGN.on&&state.health&&!state.health.gemini?`<button class="dl-prot" style="width:100%;border:0;text-align:left;color:inherit;margin-bottom:-4px" data-go="settings">${ic('info')}<span class="txt"><strong>${t('set.off')}</strong><small>${t('set.server')} →</small></span></button>`:''}
     <div class="dl-prot">${ic('shieldCheck')}<span class="txt"><strong>${t('home.ready.t')}</strong><small>${t('home.protectHint')}</small></span>
       <button class="pbtn" data-action="${ok?'protect':'fixPerms'}">${ok?t('dl.protect'):t('home.needs.cta')}</button></div>
     <div class="fav-head"><button class="sec-link" data-action="toggleFav" aria-expanded="${state.favOpen}">${t('dl.favorites')}${ic('chevUp')}</button>

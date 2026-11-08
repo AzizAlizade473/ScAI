@@ -170,7 +170,7 @@ async function api(path, o = {}) {
   return data;
 }
 window.SGapi = api;
-async function loadHealth() { try { state.health = await api('/api/health'); } catch (e) { state.health = { gemini: false, error: e.message }; } }
+async function loadHealth() { try { state.health = await api('/api/health'); } catch (e) { state.health = { gemini: false, error: e.message }; } if (state.screen === 'home' && SGN.on) render(); }
 loadHealth();
 
 const L = () => state.lang;
