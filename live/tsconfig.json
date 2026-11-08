@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "noEmit": true,
+    "target": "es2022",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["es2022", "dom"],
+    "types": ["node"],
+    "typeRoots": ["../mobile/node_modules/@types"],
+    "skipLibCheck": true
+  },
+  "files": ["session.js", "types.js"]
+}

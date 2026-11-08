@@ -1841,7 +1841,7 @@ function recompute(silent){
   if(c.smsArrived)rr=Math.max(rr,top==='code'?.97:.5);
   c.topTag=top;
   const fused=ScamRules.fuse({risk:rr},c.ai.result);
-  c.risk=Math.max(c.dangerShown?c.risk:0,fused.risk,callee().reports>0?.12:0);
+  c.risk=Math.max(c.dangerShown?c.risk:0,fused.risk,callee().reports>0?.12:0,c.liveRisk||0);   /* liveRisk: server-side aggregate of a live AI call */
   const nl=levelOf(c.risk),changed=nl!==c.level;c.level=nl;
   if(silent)return;
   refreshLive();
@@ -1852,6 +1852,7 @@ function recompute(silent){
 function scheduleAI(){
   const c=state.call;if(!c)return;
   clearTimeout(c.aiT);
+  if(c.script&&c.script.live)return;   /* live AI calls: the server's independent detector does this (live.js) */
   if(ai.mode==='off'||!window.ScamCheck){c.ai.status='off';refreshLive();return}
   c.aiT=setTimeout(runAI,250);
 }
@@ -2131,5 +2132,6 @@ document.addEventListener('DOMContentLoaded',function boot(){
 });
 </script>
 <script src="lab.js"></script>
+<script src="live.js"></script>
 </body>
 </html>

@@ -236,6 +236,29 @@
     return out;
   }
 
+  /* Generic structured generation (used by the Live call's turn-based fallback): system prompt + chat
+   * history in, JSON out, same model fallback and cooldowns as the classifier. */
+  async function generateJson(opts) {
+    const t0 = Date.now();
+    const out = await withFallback(modelList(opts.model || DEFAULT_MODEL, opts.fallback === false ? [] : FALLBACK_MODELS), async model => {
+      const body = {
+        systemInstruction: { parts: [{ text: opts.system }] },
+        contents: opts.contents,
+        generationConfig: { responseMimeType: 'application/json', responseJsonSchema: opts.schema, temperature: opts.temperature == null ? 0.8 : opts.temperature }
+      };
+      if (!/gemma/.test(model)) body.generationConfig.thinkingConfig = { thinkingLevel: 'LOW' };
+      else { delete body.generationConfig.responseJsonSchema; body.contents = body.contents.concat([{ role: 'user', parts: [{ text: 'Reply with JSON matching: ' + JSON.stringify(opts.schema) }] }]); }
+      const json = await post(opts, model, body, opts.timeoutMs || 9000);
+      const ps = (json.candidates && json.candidates[0] && json.candidates[0].content && json.candidates[0].content.parts) || [];
+      const text = ps.filter(p => !p.thought && typeof p.text === 'string').map(p => p.text).join('').trim();
+      const m = text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').match(/\{[\s\S]*\}/);
+      if (!m) { const e = new Error('No JSON from ' + model); e.transient = true; throw e; }
+      return { data: JSON.parse(m[0]), model };
+    });
+    out.ms = Date.now() - t0;
+    return out;
+  }
+
   const status = () => Object.fromEntries([...cooldown].filter(([, t]) => t > Date.now()).map(([m, t]) => [m, new Date(t).toISOString()]));
-  return { status, DEFAULT_MODEL, FALLBACK_MODELS, STT_MODELS, TTS_MODELS, SCAM_TYPES, TACTICS, SCHEMA, SYSTEM, redact, buildPrompt, buildBody, parse, normalize, levelOf, classify, transcribe, speak };
+  return { status, DEFAULT_MODEL, FALLBACK_MODELS, STT_MODELS, TTS_MODELS, SCAM_TYPES, TACTICS, SCHEMA, SYSTEM, redact, buildPrompt, buildBody, parse, normalize, levelOf, classify, transcribe, speak, generateJson };
 });

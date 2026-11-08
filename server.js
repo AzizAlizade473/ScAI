@@ -14,6 +14,10 @@ const crypto = require('crypto');
 const ScamCheck = require('./scam-check.js');
 const Rules = require('./rules.js');
 const { createStore } = require('./store.js');
+const LiveWs = require('./live/ws.js');
+const { LiveCallSession, MAX_SESSIONS } = require('./live/session.js');
+const { LIVE_MODELS, liveStatus } = require('./live/scammer-live.js');
+const Personas = require('./live/personas.js');
 
 const ROOT = __dirname;
 loadEnv();
@@ -44,7 +48,7 @@ function cacheSet(kind, key, value) {
 const sha1 = x => crypto.createHash('sha1').update(x).digest('hex');
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.wav': 'audio/wav', '.md': 'text/plain; charset=utf-8' };
-const PUBLIC = new Set(['/index.html', '/scam-check.js', '/rules.js', '/lab.js', '/lab.css', '/scenarios.js']);
+const PUBLIC = new Set(['/index.html', '/scam-check.js', '/rules.js', '/lab.js', '/lab.css', '/scenarios.js', '/live.js']);
 const PUBLIC_DIRS = [/^\/audio\/[a-z0-9_-]+(?:\/[a-z0-9_-]+)?\.wav$/];
 
 function loadEnv() {
@@ -167,7 +171,10 @@ const server = http.createServer(async (req, res) => {
     if (req.method !== 'GET' && req.method !== 'HEAD') sameOrigin(req);
 
     if (req.method === 'GET' && p === '/api/health') {
-      return send(res, 200, { gemini: Boolean(KEY), model: MODEL, fallbacks: ScamCheck.FALLBACK_MODELS, stt: STT_MODEL, tts: TTS_MODEL, store: true, history: store.stats().total, cooling: ScamCheck.status() });
+      return send(res, 200, {
+        gemini: Boolean(KEY), model: MODEL, fallbacks: ScamCheck.FALLBACK_MODELS, stt: STT_MODEL, tts: TTS_MODEL, store: true, history: store.stats().total, cooling: ScamCheck.status(),
+        live: { available: Boolean(KEY), path: '/api/live', models: LIVE_MODELS, fallback: 'stt → llm → tts', detector: MODEL, personas: Personas.publicList(), active: LiveCallSession.activeCount(), max: MAX_SESSIONS, cooling: liveStatus() }
+      });
     }
     if (req.method === 'POST' && p === '/api/classify') {            // live call transcript → AI verdict
       needKey(); rateLimit(req);
@@ -258,6 +265,34 @@ const server = http.createServer(async (req, res) => {
     if (!e.status || e.status >= 500) console.error('[server]', p, e.message);
     send(res, e.status && e.status < 600 ? e.status : 502, { error: e.message });
   }
+});
+
+/* Live AI scam call: WebSocket at /api/live (see live/session.js). Same origin rules as the API:
+ * this site, the Android app (Origin "null" / file://) or a client without an Origin header. */
+const liveByIp = new Map();
+server.on('upgrade', (req, socket) => {
+  const url = new URL(req.url || '/', 'http://localhost');
+  if (url.pathname !== '/api/live') return LiveWs.reject(socket, 404, 'Not Found');
+  const o = req.headers.origin;
+  if (o && o !== 'null' && o !== 'file://') {
+    let ok = false; try { ok = new URL(o).host === req.headers.host; } catch { /* */ }
+    if (!ok) return LiveWs.reject(socket, 403, 'Cross-origin request refused');
+  }
+  if (!KEY) return LiveWs.reject(socket, 503, 'GEMINI_API_KEY is not set on the server');
+  const ip = req.socket.remoteAddress || '?';
+  if (!LiveCallSession.canStart() || (liveByIp.get(ip) || 0) >= 2) return LiveWs.reject(socket, 429, 'Too many live calls');
+  const conn = LiveWs.accept(req, socket, { maxPayload: 256 * 1024 });
+  if (!conn) return;
+  liveByIp.set(ip, (liveByIp.get(ip) || 0) + 1);
+  const s = new LiveCallSession({
+    conn, apiKey: KEY, baseUrl: BASE, detectorModel: MODEL,
+    onEnd: x => {
+      liveByIp.set(ip, Math.max(0, (liveByIp.get(ip) || 1) - 1));
+      const sum = x.summary();
+      console.log(`[live] ${x.id} ended · ${sum.mode} ${sum.model} · ${sum.turns} turns · reply p50 ${sum.replyMsP50} ms · ${sum.level}`);
+    }
+  });
+  console.log(`[live] ${s.id} connected from ${ip}`);
 });
 
 process.on('SIGINT', () => { store.flushNow(); process.exit(0); });
