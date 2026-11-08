@@ -1,0 +1,12 @@
+{
+  "name": "yunex-backend",
+  "private": true,
+  "description": "Yunex / Scam Guardian backend: MySQL store for the app and the bronze -> silver -> gold pipeline.",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "pipeline": "node pipeline/run.js"
+  },
+  "dependencies": {
+    "mysql2": "3.24.6"
+  }
+}

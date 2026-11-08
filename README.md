@@ -39,4 +39,9 @@ through models with separate quotas and caches identical results, and labels the
 `mobile/` is an Expo (TypeScript, Expo Router) Android app. It runs the same UI, with native recording, vibration and back
 button, and connects to this server. Build an installable APK with EAS: see [mobile/README.md](mobile/README.md).
 
+## Database (MySQL) and Docker
+
+`Backend/` runs the app with a real MySQL database and a bronze → silver → gold data pipeline, all with one
+`docker compose up`. See [Backend/README.md](Backend/README.md).
+
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the design and [DEMO.md](DEMO.md) for the 90-second demo.
