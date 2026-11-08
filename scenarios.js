@@ -15,7 +15,7 @@
       id: 'bank', kind: 'scam', icon: 'bank',
       title: { az: 'Saxta bank əməkdaşı', ru: 'Фальшивый сотрудник банка', en: 'Fake bank employee' },
       sub: { az: 'Kart məlumatı və SMS kodu istəyir', ru: 'Просит данные карты и SMS-код', en: 'Asks for card details and the SMS code' },
-      caller: { name: '', number: '+994 12 404 77 31', reports: 12 },
+      caller: { name: '', number: '+994 12 404 77 31', reports: 0 },
       voice: 'Charon', style: 'Say in Azerbaijani, as a confident, slightly hurried man pretending to be a bank security officer',
       smsAt: 6,
       lines: [
@@ -32,7 +32,7 @@
       id: 'police', kind: 'scam', icon: 'shield',
       title: { az: 'Saxta polis', ru: 'Фальшивый полицейский', en: 'Fake police officer' },
       sub: { az: 'Qohumun «qəzası» üçün təcili pul', ru: 'Срочно деньги за «аварию» родственника', en: 'Urgent money for a relative’s “accident”' },
-      caller: { name: '', number: '+994 70 512 03 88', reports: 7 },
+      caller: { name: '', number: '+994 70 512 03 88', reports: 0 },
       voice: 'Fenrir', style: 'Say in Azerbaijani, as a stern, authoritative male police officer',
       lines: [
         ['caller', 'Alo, Daxili İşlər Nazirliyindən baş leytenant Əliyev danışır.', 'Hello, this is Senior Lieutenant Aliyev from the Ministry of Internal Affairs.'],
@@ -48,7 +48,7 @@
       id: 'invest', kind: 'scam', icon: 'spark',
       title: { az: 'İnvestisiya fırıldağı', ru: 'Инвестиционное мошенничество', en: 'Investment scam' },
       sub: { az: '«Zəmanətli gəlir» və AnyDesk', ru: '«Гарантированный доход» и AnyDesk', en: '“Guaranteed profit” and AnyDesk' },
-      caller: { name: '', number: '+994 55 260 41 19', reports: 3 },
+      caller: { name: '', number: '+994 55 260 41 19', reports: 0 },
       voice: 'Orus', style: 'Say in Azerbaijani, as an overly friendly, enthusiastic young male salesman',
       lines: [
         ['caller', 'Salam! Mən investisiya platformasından məsləhətçi Kamranam. Sizə xüsusi təklifimiz var.', 'Hello! I\'m Kamran, an adviser from an investment platform. We have a special offer for you.'],

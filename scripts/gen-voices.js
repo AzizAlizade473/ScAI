@@ -76,7 +76,7 @@ for (const [lang, text] of Object.entries(S.ALERT.text)) jobs.push({ file: path.
           console.warn('…', path.relative(ROOT, j.file), 'attempt', attempt, e.message);
           if (attempt === 4) process.exitCode = 1;
           const wait = +((e.message.match(/retry in ([\d.]+)s/) || [])[1] || 20);
-          await new Promise(r => setTimeout(r, (wait + 1) * 1000));
+          await new Promise(r => setTimeout(r, Math.min(60, wait + 1) * 1000));
         }
       }
     }

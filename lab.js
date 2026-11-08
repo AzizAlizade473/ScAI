@@ -497,7 +497,7 @@ function cmpHTML() {
   if (!a || !b) return `<p class="muted" style="font-size:15px">${t('lab.cmp.empty')}</p>`;
   const col = (sc, r) => `<div class="rk-${r.level}"><b>${esc(Scenarios.byId(sc).title[L()])}</b>
      <div class="lvl">${t('risk.' + r.level)} · ${pct(r.risk)}</div>
-     <small>${r.tactics.length ? r.tactics.map(tacticLabel).join(', ') : t('res.noEvidence')}</small>
+     <small>${r.level !== 'safe' && r.tactics.length ? r.tactics.map(tacticLabel).join(', ') : (r.reason && r.reason[L()]) || t('res.noEvidence')}</small>
      ${r.firstWarnAt != null ? `<small>${t('lab.firstWarn')}: ${fmtTime(r.firstWarnAt)}</small>` : ''}
      <small>${t('lab.stt')}: ${r.sttLines} ${t('lab.lines')}${r.sttAvg ? ' · ⌀ ' + ms(r.sttAvg) : ''}</small></div>`;
   return `<div class="cmp">${col('realbank', a)}${col('bank', b)}</div>`;

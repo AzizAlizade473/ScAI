@@ -1,6 +1,6 @@
 {
- "ranAt": "2026-11-07T21:26:39.117Z",
- "model": null,
+ "ranAt": "2026-11-08T04:41:00.597Z",
+ "model": "gemini-3.5-flash-lite",
  "dataset": {
   "n": 46,
   "about": "Hand-written by the Scam Guardian team for testing. Not real victims' data. Labels: scam / legit. 'hard' marks cases written to trick keyword rules (legit texts that mention codes or money, scams without obvious keywords).",
@@ -13,91 +13,101 @@
   "rules": {
    "n": 46,
    "tp": 21,
-   "fp": 4,
-   "tn": 19,
+   "fp": 1,
+   "tn": 22,
    "fn": 2,
-   "precision": 0.84,
+   "precision": 0.955,
    "recall": 0.913,
-   "f1": 0.875,
-   "accuracy": 0.87
+   "f1": 0.933,
+   "accuracy": 0.935
   },
-  "ai": null,
+  "ai": {
+   "n": 46,
+   "tp": 23,
+   "fp": 0,
+   "tn": 23,
+   "fn": 0,
+   "precision": 1,
+   "recall": 1,
+   "f1": 1,
+   "accuracy": 1
+  },
   "fused": {
    "n": 46,
-   "tp": 21,
-   "fp": 4,
-   "tn": 19,
-   "fn": 2,
-   "precision": 0.84,
-   "recall": 0.913,
-   "f1": 0.875,
-   "accuracy": 0.87
+   "tp": 23,
+   "fp": 0,
+   "tn": 23,
+   "fn": 0,
+   "precision": 1,
+   "recall": 1,
+   "f1": 1,
+   "accuracy": 1
   },
   "fusedHardOnly": {
    "n": 15,
-   "tp": 3,
-   "fp": 4,
-   "tn": 6,
-   "fn": 2,
-   "precision": 0.429,
-   "recall": 0.6,
-   "f1": 0.5,
-   "accuracy": 0.6
+   "tp": 5,
+   "fp": 0,
+   "tn": 10,
+   "fn": 0,
+   "precision": 1,
+   "recall": 1,
+   "f1": 1,
+   "accuracy": 1
   },
   "rulesHardOnly": {
    "n": 15,
    "tp": 3,
-   "fp": 4,
-   "tn": 6,
+   "fp": 1,
+   "tn": 9,
    "fn": 2,
-   "precision": 0.429,
+   "precision": 0.75,
    "recall": 0.6,
-   "f1": 0.5,
-   "accuracy": 0.6
+   "f1": 0.667,
+   "accuracy": 0.8
   }
  },
  "byLang": {
   "az": {
    "n": 22,
-   "tp": 10,
-   "fp": 2,
-   "tn": 9,
-   "fn": 1,
-   "precision": 0.833,
-   "recall": 0.909,
-   "f1": 0.87,
-   "accuracy": 0.864
+   "tp": 11,
+   "fp": 0,
+   "tn": 11,
+   "fn": 0,
+   "precision": 1,
+   "recall": 1,
+   "f1": 1,
+   "accuracy": 1
   },
   "ru": {
    "n": 12,
    "tp": 6,
-   "fp": 1,
-   "tn": 5,
+   "fp": 0,
+   "tn": 6,
    "fn": 0,
-   "precision": 0.857,
+   "precision": 1,
    "recall": 1,
-   "f1": 0.923,
-   "accuracy": 0.917
+   "f1": 1,
+   "accuracy": 1
   },
   "en": {
    "n": 12,
-   "tp": 5,
-   "fp": 1,
-   "tn": 5,
-   "fn": 1,
-   "precision": 0.833,
-   "recall": 0.833,
-   "f1": 0.833,
-   "accuracy": 0.833
+   "tp": 6,
+   "fp": 0,
+   "tn": 6,
+   "fn": 0,
+   "precision": 1,
+   "recall": 1,
+   "f1": 1,
+   "accuracy": 1
   }
  },
  "latency": {
-  "rulesMsP50": 0.04,
-  "rulesMsP95": 29.79,
-  "aiMsP50": null,
-  "aiMsP95": null,
-  "aiCalls": 0,
-  "aiFailures": 46
+  "rulesMsP50": 0.2,
+  "rulesMsP95": 22.62,
+  "aiMsP50": 1514,
+  "aiMsP95": 1898,
+  "aiCalls": 46,
+  "aiFailures": 0
  },
  "rows": [
   {
@@ -113,13 +123,24 @@
      "urgency",
      "suspicious_link"
     ],
-    "ms": 145.09
+    "ms": 65.79
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "phishing_link",
+    "tactics": [
+     "impersonation",
+     "urgency",
+     "suspicious_link"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1778
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.84
+    "risk": 0.95
    }
   },
   {
@@ -135,13 +156,23 @@
      "prize_fee",
      "suspicious_link"
     ],
-    "ms": 46.83
+    "ms": 54.63
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "fake_prize",
+    "tactics": [
+     "prize_fee",
+     "suspicious_link"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1807
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.86
+    "risk": 0.95
    }
   },
   {
@@ -158,13 +189,25 @@
      "impersonation",
      "suspicious_link"
     ],
-    "ms": 12.72
+    "ms": 5.22
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "fake_government",
+    "tactics": [
+     "impersonation",
+     "suspicious_link",
+     "card_request",
+     "prize_fee"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1730
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.86
+    "risk": 0.95
    }
   },
   {
@@ -180,13 +223,24 @@
      "money_transfer",
      "urgency"
     ],
-    "ms": 0.08
+    "ms": 0.24
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "fake_relative",
+    "tactics": [
+     "impersonation",
+     "urgency",
+     "money_transfer"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1629
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.84
+    "risk": 0.95
    }
   },
   {
@@ -201,13 +255,25 @@
     "tactics": [
      "suspicious_link"
     ],
-    "ms": 0.24
+    "ms": 0.81
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "fake_courier",
+    "tactics": [
+     "impersonation",
+     "urgency",
+     "money_transfer",
+     "suspicious_link"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1702
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.82
+    "risk": 0.95
    }
   },
   {
@@ -222,13 +288,26 @@
     "tactics": [
      "secrecy"
     ],
-    "ms": 0.2
+    "ms": 0.7
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.9,
+    "scamType": "fake_relative",
+    "tactics": [
+     "impersonation",
+     "emotional_manipulation",
+     "urgency",
+     "secrecy",
+     "money_transfer"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1933
+   },
    "aiError": null,
    "fused": {
-    "level": "safe",
-    "risk": 0.35
+    "level": "danger",
+    "risk": 0.9
    }
   },
   {
@@ -238,19 +317,23 @@
    "label": "legit",
    "hard": true,
    "rules": {
-    "level": "danger",
-    "risk": 0.84,
-    "tactics": [
-     "otp_request",
-     "impersonation"
-    ],
-    "ms": 1.86
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.21
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1410
+   },
    "aiError": null,
    "fused": {
-    "level": "danger",
-    "risk": 0.84
+    "level": "safe",
+    "risk": 0
    }
   },
   {
@@ -263,9 +346,16 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.04
+    "ms": 0.17
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1268
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
@@ -284,13 +374,20 @@
     "tactics": [
      "money_transfer"
     ],
-    "ms": 0.03
+    "ms": 0.16
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1261
+   },
    "aiError": null,
    "fused": {
-    "level": "caution",
-    "risk": 0.58
+    "level": "safe",
+    "risk": 0.44
    }
   },
   {
@@ -303,9 +400,16 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.13
+    "ms": 0.31
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1148
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
@@ -322,13 +426,20 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.04
+    "ms": 0.19
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0.1,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1148
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
-    "risk": 0
+    "risk": 0.1
    }
   },
   {
@@ -343,9 +454,16 @@
     "tactics": [
      "urgency"
     ],
-    "ms": 0.07
+    "ms": 0.3
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1070
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
@@ -365,13 +483,24 @@
      "otp_request",
      "impersonation"
     ],
-    "ms": 0.04
+    "ms": 0.21
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "fake_bank",
+    "tactics": [
+     "impersonation",
+     "otp_request",
+     "urgency"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1868
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.92
+    "risk": 0.95
    }
   },
   {
@@ -388,13 +517,25 @@
      "money_transfer",
      "secrecy"
     ],
-    "ms": 0.15
+    "ms": 0.14
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "fake_government",
+    "tactics": [
+     "impersonation",
+     "safe_account",
+     "urgency",
+     "secrecy"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1726
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.88
+    "risk": 0.95
    }
   },
   {
@@ -411,13 +552,26 @@
      "impersonation",
      "urgency"
     ],
-    "ms": 0.04
+    "ms": 0.26
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "fake_relative",
+    "tactics": [
+     "impersonation",
+     "urgency",
+     "secrecy",
+     "emotional_manipulation",
+     "money_transfer"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1896
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.84
+    "risk": 0.95
    }
   },
   {
@@ -433,13 +587,25 @@
      "remote_access",
      "investment"
     ],
-    "ms": 0.04
+    "ms": 0.25
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "investment",
+    "tactics": [
+     "investment",
+     "remote_access",
+     "impersonation",
+     "urgency"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1733
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.9
+    "risk": 0.95
    }
   },
   {
@@ -455,13 +621,24 @@
      "impersonation",
      "urgency"
     ],
-    "ms": 0.04
+    "ms": 0.23
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "fake_government",
+    "tactics": [
+     "impersonation",
+     "urgency",
+     "emotional_manipulation"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1613
+   },
    "aiError": null,
    "fused": {
-    "level": "caution",
-    "risk": 0.5
+    "level": "danger",
+    "risk": 0.95
    }
   },
   {
@@ -474,13 +651,20 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.06
+    "ms": 0.21
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0.1,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1125
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
-    "risk": 0
+    "risk": 0.1
    }
   },
   {
@@ -493,13 +677,20 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.06
+    "ms": 0.16
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0.05,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1430
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
-    "risk": 0
+    "risk": 0.05
    }
   },
   {
@@ -512,13 +703,20 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.04
+    "ms": 0.15
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0.1,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1316
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
-    "risk": 0
+    "risk": 0.1
    }
   },
   {
@@ -533,9 +731,16 @@
     "tactics": [
      "impersonation"
     ],
-    "ms": 0.06
+    "ms": 0.2
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0.1,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1111
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
@@ -552,13 +757,20 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.1
+    "ms": 0.08
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0.05,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1190
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
-    "risk": 0
+    "risk": 0.05
    }
   },
   {
@@ -574,13 +786,24 @@
      "urgency",
      "suspicious_link"
     ],
-    "ms": 0.13
+    "ms": 0.56
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "fake_bank",
+    "tactics": [
+     "impersonation",
+     "urgency",
+     "suspicious_link"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1740
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.84
+    "risk": 0.95
    }
   },
   {
@@ -596,13 +819,24 @@
      "prize_fee",
      "suspicious_link"
     ],
-    "ms": 0.08
+    "ms": 1.69
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "fake_prize",
+    "tactics": [
+     "prize_fee",
+     "suspicious_link",
+     "urgency"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1609
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.86
+    "risk": 0.95
    }
   },
   {
@@ -618,13 +852,24 @@
      "money_transfer",
      "urgency"
     ],
-    "ms": 0.03
+    "ms": 0.3
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "fake_relative",
+    "tactics": [
+     "impersonation",
+     "urgency",
+     "money_transfer"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1898
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.84
+    "risk": 0.95
    }
   },
   {
@@ -634,19 +879,23 @@
    "label": "legit",
    "hard": true,
    "rules": {
-    "level": "danger",
-    "risk": 0.84,
-    "tactics": [
-     "otp_request",
-     "impersonation"
-    ],
-    "ms": 0.05
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.41
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0.05,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1267
+   },
    "aiError": null,
    "fused": {
-    "level": "danger",
-    "risk": 0.84
+    "level": "safe",
+    "risk": 0.05
    }
   },
   {
@@ -659,9 +908,16 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.02
+    "ms": 0.17
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1443
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
@@ -678,13 +934,20 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.02
+    "ms": 0.12
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0.05,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1028
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
-    "risk": 0
+    "risk": 0.05
    }
   },
   {
@@ -700,13 +963,24 @@
      "otp_request",
      "impersonation"
     ],
-    "ms": 0.05
+    "ms": 0.57
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "fake_bank",
+    "tactics": [
+     "impersonation",
+     "otp_request",
+     "urgency"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1670
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.92
+    "risk": 0.95
    }
   },
   {
@@ -723,13 +997,26 @@
      "urgency",
      "secrecy"
     ],
-    "ms": 0.04
+    "ms": 0.11
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "fake_relative",
+    "tactics": [
+     "impersonation",
+     "urgency",
+     "secrecy",
+     "emotional_manipulation",
+     "money_transfer"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1746
+   },
    "aiError": null,
    "fused": {
-    "level": "caution",
-    "risk": 0.5
+    "level": "danger",
+    "risk": 0.95
    }
   },
   {
@@ -744,13 +1031,24 @@
     "tactics": [
      "remote_access"
     ],
-    "ms": 0.03
+    "ms": 0.13
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "remote_access",
+    "tactics": [
+     "impersonation",
+     "urgency",
+     "remote_access"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1564
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.9
+    "risk": 0.95
    }
   },
   {
@@ -763,13 +1061,20 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.04
+    "ms": 0.1
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0.1,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1234
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
-    "risk": 0
+    "risk": 0.1
    }
   },
   {
@@ -782,13 +1087,20 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.02
+    "ms": 0.08
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0.1,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1263
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
-    "risk": 0
+    "risk": 0.1
    }
   },
   {
@@ -801,13 +1113,20 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.02
+    "ms": 0.07
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0.05,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1131
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
-    "risk": 0
+    "risk": 0.05
    }
   },
   {
@@ -823,13 +1142,24 @@
      "urgency",
      "suspicious_link"
     ],
-    "ms": 29.79
+    "ms": 22.62
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "phishing_link",
+    "tactics": [
+     "urgency",
+     "impersonation",
+     "suspicious_link"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1560
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.84
+    "risk": 0.95
    }
   },
   {
@@ -846,13 +1176,24 @@
      "prize_fee",
      "suspicious_link"
     ],
-    "ms": 0.2
+    "ms": 0.11
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "fake_prize",
+    "tactics": [
+     "prize_fee",
+     "suspicious_link",
+     "urgency"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1514
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.86
+    "risk": 0.95
    }
   },
   {
@@ -865,13 +1206,25 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.03
+    "ms": 0.1
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.9,
+    "scamType": "fake_relative",
+    "tactics": [
+     "impersonation",
+     "urgency",
+     "secrecy",
+     "money_transfer"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1744
+   },
    "aiError": null,
    "fused": {
-    "level": "safe",
-    "risk": 0
+    "level": "danger",
+    "risk": 0.9
    }
   },
   {
@@ -881,18 +1234,23 @@
    "label": "legit",
    "hard": true,
    "rules": {
-    "level": "caution",
-    "risk": 0.62,
-    "tactics": [
-     "otp_request"
-    ],
-    "ms": 3.9
+    "level": "safe",
+    "risk": 0,
+    "tactics": [],
+    "ms": 0.28
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1424
+   },
    "aiError": null,
    "fused": {
-    "level": "caution",
-    "risk": 0.62
+    "level": "safe",
+    "risk": 0
    }
   },
   {
@@ -905,9 +1263,16 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.03
+    "ms": 0.11
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1245
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
@@ -924,9 +1289,16 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.02
+    "ms": 0.09
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1261
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
@@ -945,13 +1317,24 @@
     "tactics": [
      "otp_request"
     ],
-    "ms": 0.05
+    "ms": 0.12
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "fake_bank",
+    "tactics": [
+     "impersonation",
+     "otp_request",
+     "urgency"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 2134
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.92
+    "risk": 0.95
    }
   },
   {
@@ -967,13 +1350,24 @@
      "money_transfer",
      "impersonation"
     ],
-    "ms": 0.03
+    "ms": 0.19
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.95,
+    "scamType": "fake_government",
+    "tactics": [
+     "impersonation",
+     "urgency",
+     "money_transfer"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1550
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.84
+    "risk": 0.95
    }
   },
   {
@@ -989,13 +1383,24 @@
      "money_transfer",
      "investment"
     ],
-    "ms": 0.03
+    "ms": 0.18
    },
-   "ai": null,
+   "ai": {
+    "level": "danger",
+    "risk": 0.9,
+    "scamType": "investment",
+    "tactics": [
+     "investment",
+     "money_transfer",
+     "urgency"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1787
+   },
    "aiError": null,
    "fused": {
     "level": "danger",
-    "risk": 0.86
+    "risk": 0.9
    }
   },
   {
@@ -1008,13 +1413,20 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.03
+    "ms": 0.13
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0.1,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1329
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
-    "risk": 0
+    "risk": 0.1
    }
   },
   {
@@ -1027,13 +1439,20 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.02
+    "ms": 0.11
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0.05,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1393
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
-    "risk": 0
+    "risk": 0.05
    }
   },
   {
@@ -1046,9 +1465,16 @@
     "level": "safe",
     "risk": 0,
     "tactics": [],
-    "ms": 0.02
+    "ms": 0.2
    },
-   "ai": null,
+   "ai": {
+    "level": "safe",
+    "risk": 0,
+    "scamType": "none",
+    "tactics": [],
+    "model": "gemini-3.5-flash-lite",
+    "ms": 1166
+   },
    "aiError": null,
    "fused": {
     "level": "safe",
