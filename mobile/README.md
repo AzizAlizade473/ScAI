@@ -46,6 +46,22 @@ npx expo start                 # press "a" with a development build installed, o
   Start it with `EXPO_PUBLIC_API_URL=http://192.168.1.10:8787 npx expo start --go`.
   Voice recording also needs the development build.
 
+## 3a. Build the APK on this Windows PC (no Expo account)
+
+Needs JDK 17 and the Android SDK (installed here under `%USERPROFILE%\Android`). One command:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File mobile\scriptsuild-apk-local.ps1
+```
+
+It copies the app to a short folder (`C:\m`, because Windows limits paths to 260 characters), builds a release APK
+and puts it in the repository root as `ScamGuardian.apk`. First build: about 25 minutes. Add `-Resume` to rebuild
+after a small change (about 4 minutes). Install it on a phone with USB debugging: `adb install -r ScamGuardian.apk`,
+or copy the file to the phone and open it (allow "Install unknown apps").
+
+The default AI server in the APK is `http://192.168.120.129:8787`. Override it with `EXPO_PUBLIC_API_URL`
+before building, or change it in the app (Ayarlar → Server ünvanı).
+
 ## 3. Build an installable APK (EAS)
 
 ```bash

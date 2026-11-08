@@ -1,6 +1,6 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "scam-guardian", "runtimeExecutable": "node", "runtimeArgs": ["server.js"], "port": 8787 }
+    { "name": "scam-guardian", "runtimeExecutable": "node", "runtimeArgs": ["server.js"], "port": 8787, "env": { "HOST": "0.0.0.0" } }
   ]
 }
